@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 120" width="100%" height="100%">
+  <defs>
+    <filter id="badgeShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="1" dy="3" stdDeviation="3" flood-color="#091a2f" flood-opacity="0.25"/>
+    </filter>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e5b869" />
+      <stop offset="50%" stop-color="#c59b4c" />
+      <stop offset="100%" stop-color="#9a7428" />
+    </linearGradient>
+    <clipPath id="circleClip">
+      <circle cx="60" cy="60" r="54" />
+    </clipPath>
+  </defs>
+
+  <!-- ISOTIPO OFICIAL HD DE FRANCO'S POLLO -->
+  <g transform="translate(6, 0)">
+    <circle cx="60" cy="60" r="56" fill="url(#goldGradient)" filter="url(#badgeShadow)" />
+    <!-- Imagen HD original completa con tipografía circular nítida -->
+    <image href="/static/images/logo_badge.jpg" x="6" y="6" width="108" height="108" clip-path="url(#circleClip)" preserveAspectRatio="xMidYMid slice" />
+  </g>
+
+  <!-- TIPOGRAFÍA Y TEXTO COMPLEMENTARIO -->
+  <g transform="translate(136, 38)">
+    <!-- FRANCO'S -->
+    <text x="0" y="30" font-family="'Montserrat', 'Cinzel', 'Arial Black', sans-serif" font-weight="900" font-size="34" fill="#0f2a4a" letter-spacing="2">
+      FRANCO'S
+    </text>
+
+    <!-- POLLO -->
+    <g transform="translate(0, 48)">
+      <line x1="0" y1="-8" x2="38" y2="-8" stroke="#c59b4c" stroke-width="2" stroke-linecap="round"/>
+      <polygon points="40,-8 43,-10 46,-8 43,-6" fill="#c59b4c"/>
+
+      <text x="56" y="-1" font-family="'Montserrat', 'Cinzel', sans-serif" font-weight="900" font-size="20" fill="#c59b4c" letter-spacing="5">
+        POLLO
+      </text>
+
+      <polygon points="166,-8 169,-10 172,-8 169,-6" fill="#c59b4c"/>
+      <line x1="174" y1="-8" x2="212" y2="-8" stroke="#c59b4c" stroke-width="2" stroke-linecap="round"/>
+    </g>
+
+    <!-- SLOGAN: EL POLLO DE CADA HOGAR -->
+    <text x="2" y="64" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="10.5" fill="#506680" letter-spacing="3.5">
+      EL POLLO DE CADA HOGAR
+    </text>
+  </g>
+
+  <!-- SEDES OFICIALES -->
+  <g transform="translate(415, 38)">
+    <rect x="0" y="0" width="95" height="46" rx="14" fill="#f8f6f0" stroke="#c59b4c" stroke-width="1.5" />
+    <text x="47.5" y="16" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="8.5" fill="#0f2a4a" text-anchor="middle">MALAMBO</text>
+    <text x="47.5" y="28" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="8" fill="#c59b4c" text-anchor="middle">SOLEDAD</text>
+    <text x="47.5" y="39" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="7.5" fill="#0f2a4a" text-anchor="middle">BARRANQUILLA</text>
+  </g>
+</svg>

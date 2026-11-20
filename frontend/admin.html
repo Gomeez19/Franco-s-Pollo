@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FRANCO'S POLLO – Panel de Control y Suite Avícola</title>
+  <link rel="icon" type="image/svg+xml" href="/static/images/logo.svg">
+  <!-- Tailwind CSS con Paleta Oficial Franco's Pollo -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#0f2a4a',       // Azul Oscuro Principal de Marca
+              navyDark: '#091a2f',   // Azul Profundo
+              navyLight: '#1c3e66',  // Azul Medio
+              gold: '#c59b4c',       // Dorado Trigo Oficial
+              goldHover: '#b3883b',  // Dorado Hover
+              goldLight: '#e5b869',  // Dorado Claro
+              cream: '#f8f6f0',      // Crema de Fondo Institucional
+              surface: '#ffffff'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex">
+
+  <!-- ADMIN LOGIN OVERLAY -->
+  <div id="adminLoginOverlay" class="fixed inset-0 bg-brand-navyDark/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 text-center animate-fade-in border border-slate-200">
+      <div class="w-20 h-20 rounded-full border-2 border-brand-gold overflow-hidden mx-auto mb-4 shadow-xl">
+        <img src="/static/images/logo_badge.jpg" alt="Logo Oficial" class="w-full h-full object-cover">
+      </div>
+      <h2 class="text-2xl font-black text-brand-navy">Acceso Administrativo</h2>
+      <p class="text-xs text-brand-gold font-bold uppercase tracking-wider mt-1 mb-6">Franco's Pollo – El Pollo de Cada Hogar</p>
+
+      <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="space-y-4 text-left" autocomplete="off">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Correo Electrónico de Administrador</label>
+          <input type="email" id="adminEmail" required autocomplete="off" placeholder="admin@francospollo.com" class="w-full p-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-gold focus:outline-none bg-slate-50">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Contraseña Segura</label>
+          <input type="password" id="adminPassword" required autocomplete="new-password" placeholder="••••••••••••" class="w-full p-3.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-gold focus:outline-none bg-slate-50">
+        </div>
+
+        <button type="submit" id="adminLoginBtn" class="w-full bg-brand-navy hover:bg-brand-navyDark text-white font-extrabold py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2">
+          <i data-lucide="lock" class="w-4 h-4 text-brand-gold"></i> Iniciar Sesión Protegida
+        </button>
+      </form>
+
+      <div class="mt-6 pt-4 border-t border-slate-100 text-xs text-slate-400 flex justify-between items-center">
+        <span>🔒 Sesión protegida (JWT 5 min timeout)</span>
+        <a href="/" class="text-brand-navy font-bold hover:text-brand-gold">Ir a la Tienda</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR NAVIGATION -->
+  <aside id="sidebar" class="w-64 bg-brand-navyDark text-slate-300 flex flex-col justify-between hidden md:flex border-r border-slate-800 z-30">
+    <div>
+      <!-- Brand Header -->
+      <div class="p-5 border-b border-slate-800 flex items-center gap-3">
+        <img src="/static/images/logo_badge.jpg" alt="Logo Franco's" class="w-12 h-12 rounded-full border border-brand-gold object-cover shadow">
+        <div>
+          <h1 class="text-white font-black text-sm tracking-wide">FRANCO'S POLLO</h1>
+          <span class="text-[9.5px] text-brand-gold font-bold uppercase tracking-wider block">El Pollo de Cada Hogar</span>
+          <span class="text-[9px] text-slate-400">Malambo • Soledad • B/quilla</span>
+        </div>
+      </div>
+
+      <!-- Navigation Links (Paleta Oficial Azul Noche y Dorado) -->
+      <nav class="p-3 space-y-1 text-xs font-bold">
+        <!-- SECCIÓN ESTRELLA NUEVA: CONTROL DE POLLOS (FOTOS PROPORCIONADAS) -->
+        <button onclick="switchAdminTab('poultry-control')" id="nav-poultry-control" class="nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl transition text-left text-brand-navyDark bg-brand-gold shadow">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          <span class="flex-1">Control de Pollos</span>
+          <span class="bg-brand-navyDark text-brand-gold text-[9px] font-black px-1.5 py-0.5 rounded">NUEVO</span>
+        </button>
+
+        <button onclick="switchAdminTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition text-left text-slate-300 hover:bg-brand-navy hover:text-white">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 text-brand-gold"></i> Dashboard Resumen
+        </button>
+
+        <button onclick="switchAdminTab('products')" id="nav-products" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition text-left text-slate-300 hover:bg-brand-navy hover:text-white">
+          <i data-lucide="package" class="w-4 h-4 text-brand-gold"></i> Productos y Fotos
+        </button>
+
+        <button onclick="switchAdminTab('inventory')" id="nav-inventory" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition text-left text-slate-300 hover:bg-brand-navy hover:text-white">
+          <i data-lucide="boxes" class="w-4 h-4 text-brand-gold"></i> Inventario & Kardex
+        </button>
+
+        <button onclick="switchAdminTab('orders')" id="nav-orders" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition text-left text-slate-300 hover:bg-brand-navy hover:text-white">
+          <i data-lucide="shopping-bag" class="w-4 h-4 text-brand-gold"></i> Pedidos Recibidos
+        </button>
+
+        <button onclick="switchAdminTab('calculator')" id="nav-calculator" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition text-left text-slate-300 hover:bg-brand-navy hover:text-white">
+          <i data-lucide="calculator" class="w-4 h-4 text-brand-gold"></i> Calculadora Precios
+        </button>
+
+        <button onclick="switchAdminTab('customers')" id="nav-customers" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition text-left text-slate-300 hover:bg-brand-navy hover:text-white">
+          <i data-lucide="users" class="w-4 h-4 text-brand-gold"></i> Clientes
+        </button>
+
+        <button onclick="switchAdminTab('finances')" id="nav-finances" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition text-left text-slate-300 hover:bg-brand-navy hover:text-white">
+          <i data-lucide="dollar-sign" class="w-4 h-4 text-brand-gold"></i> Finanzas & Costos
+        </button>
+
+        <button onclick="switchAdminTab('suppliers')" id="nav-suppliers" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition text-left text-slate-300 hover:bg-brand-navy hover:text-white">
+          <i data-lucide="truck" class="w-4 h-4 text-brand-gold"></i> Proveedores & Compras
+        </button>
+
+        <button onclick="switchAdminTab('reports')" id="nav-reports" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition text-left text-slate-300 hover:bg-brand-navy hover:text-white">
+          <i data-lucide="file-spreadsheet" class="w-4 h-4 text-brand-gold"></i> Reportes
+        </button>
+
+        <button onclick="switchAdminTab('settings')" id="nav-settings" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition text-left text-slate-300 hover:bg-brand-navy hover:text-white">
+          <i data-lucide="settings" class="w-4 h-4 text-brand-gold"></i> Configuración
+        </button>
+      </nav>
+    </div>
+
+    <!-- Sidebar Bottom User Profile -->
+    <div class="p-4 border-t border-slate-800 space-y-3">
+      <a href="/" target="_blank" class="w-full py-2.5 px-3 bg-brand-navy hover:bg-brand-navyDark text-xs font-bold text-white rounded-xl flex items-center justify-center gap-2 transition border border-brand-gold/30">
+        <i data-lucide="external-link" class="w-4 h-4 text-brand-gold"></i> Ver Tienda Online
+      </a>
+      <div class="flex items-center justify-between pt-1">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-brand-gold text-brand-navyDark flex items-center justify-center text-xs font-black">AD</div>
+          <div class="text-xs">
+            <div id="adminUserName" class="font-bold text-white leading-tight">Admin</div>
+            <div class="text-slate-400 text-[10px]">Franco's Pollo</div>
+          </div>
+        </div>
+        <button onclick="logoutAdmin()" class="text-slate-400 hover:text-red-400 p-1.5 transition" title="Cerrar Sesión">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN VIEWPORT -->
+  <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+    <!-- TOP BAR -->
+    <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-20 shadow-xs">
+      <div class="flex items-center gap-4">
+        <button onclick="toggleMobileSidebar()" class="md:hidden text-slate-600 p-2 rounded-xl hover:bg-slate-100">
+          <i data-lucide="menu" class="w-6 h-6"></i>
+        </button>
+        <h2 id="currentSectionTitle" class="text-xl font-black text-brand-navy tracking-tight">Control de Pollos y Galpón</h2>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="relative">
+          <button onclick="toggleNotifications()" class="relative p-2.5 rounded-xl text-slate-600 hover:bg-brand-cream transition">
+            <i data-lucide="bell" class="w-5 h-5 text-brand-navy"></i>
+            <span id="notifBadge" class="hidden absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full"></span>
+          </button>
+          <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 z-50">
+            <div class="flex justify-between items-center mb-2 pb-2 border-b border-slate-100">
+              <span class="text-xs font-black text-brand-navy uppercase tracking-wider">Alertas del Sistema</span>
+              <span class="text-[10px] text-slate-400">En tiempo real</span>
+            </div>
+            <div id="notifList" class="space-y-2 text-xs text-slate-600 max-h-60 overflow-y-auto"></div>
+          </div>
+        </div>
+
+        <button onclick="refreshCurrentSection()" class="p-2.5 rounded-xl text-slate-600 hover:bg-brand-cream transition" title="Refrescar Datos">
+          <i data-lucide="refresh-cw" class="w-5 h-5 text-brand-navy"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTENT WRAPPER -->
+    <div class="p-6 md:p-8 space-y-8 flex-1">
+
+      <!-- ===================================================================== -->
+      <!-- TAB ESPECIAL: CONTROL DE POLLOS (INTERFAZ DE LAS IMÁGENES DEL USUARIO) -->
+      <!-- ===================================================================== -->
+      <section id="section-poultry-control" class="admin-section space-y-6">
+        <!-- Submenú de Control Avícola estilo App -->
+        <div class="bg-brand-navyDark text-white p-4 rounded-3xl shadow-md flex items-center justify-between flex-wrap gap-4">
+          <div class="flex items-center gap-3">
+            <img src="/static/images/logo_badge.jpg" class="w-10 h-10 rounded-full border border-brand-gold object-cover">
+            <div>
+              <h3 class="text-base font-black">Franco's Pollos – Gestión de Lote</h3>
+              <p class="text-xs text-brand-gold font-medium">Control de Galpón, Pesos, Gastos e Ingresos</p>
+            </div>
+          </div>
+
+          <!-- Pestañas internas del módulo -->
+          <div class="flex bg-slate-900/90 p-1.5 rounded-2xl border border-slate-700 flex-wrap gap-1">
+            <button onclick="switchPoultrySubtab('control')" id="subtab-btn-control" class="px-4 py-2 rounded-xl text-xs font-black bg-brand-gold text-brand-navyDark shadow">
+              📊 Control / Pesos
+            </button>
+            <button onclick="switchPoultrySubtab('ventas')" id="subtab-btn-ventas" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white">
+              🛒 Ventas
+            </button>
+            <button onclick="switchPoultrySubtab('gastos')" id="subtab-btn-gastos" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white">
+              🧾 Gastos Lote
+            </button>
+            <button onclick="switchPoultrySubtab('ingresos')" id="subtab-btn-ingresos" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white">
+              💰 Ingresos
+            </button>
+          </div>
+        </div>
+
+        <!-- 1. VISTA CONTROL: PESOS, ALIMENTACIÓN Y MORTALIDAD (IMAGEN 4) -->
+        <div id="poultryViewControl" class="space-y-6">
+          <!-- KPI Header Galpón -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 text-center shadow-xs">
+              <div id="pcGalponCount" class="text-3xl font-black text-brand-navy">47</div>
+              <div class="text-xs text-slate-500 font-bold mt-1">En Galpón</div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 text-center shadow-xs">
+              <div id="pcBajasCount" class="text-3xl font-black text-red-600">3</div>
+              <div class="text-xs text-slate-500 font-bold mt-1">Bajas / Mortalidad</div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 text-center shadow-xs">
+              <div id="pcSacrificadosCount" class="text-3xl font-black text-slate-700">0</div>
+              <div class="text-xs text-slate-500 font-bold mt-1">Sacrificados</div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 text-center shadow-xs">
+              <div id="pcIniciadosCount" class="text-3xl font-black text-brand-gold">50</div>
+              <div class="text-xs text-slate-500 font-bold mt-1">Iniciados</div>
+            </div>
+          </div>
+
+          <!-- Tabla de Peso Ideal -->
+          <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs">
+            <div class="p-4 bg-brand-cream border-b border-brand-gold/30 flex justify-between items-center">
+              <div class="flex items-center gap-2 font-black text-brand-navy text-sm">
+                <i data-lucide="scale" class="w-4 h-4 text-brand-gold"></i> Tabla de Peso Ideal por Día
+              </div>
+              <span class="text-xs text-slate-500 font-semibold">Parámetro Avícola Estándar</span>
+            </div>
+            <div class="grid grid-cols-3 text-center text-xs divide-x divide-slate-100 p-4 font-bold">
+              <div>
+                <div class="text-slate-400 text-[11px]">Día</div>
+                <div class="text-lg text-brand-navy font-black mt-1">15</div>
+              </div>
+              <div>
+                <div class="text-slate-400 text-[11px]">Machos (g)</div>
+                <div class="text-lg text-slate-800 font-black mt-1">593 g</div>
+              </div>
+              <div>
+                <div class="text-slate-400 text-[11px]">Hembras (g)</div>
+                <div class="text-lg text-slate-800 font-black mt-1">499 g</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Historial de Pesajes -->
+          <div class="bg-white rounded-3xl border border-slate-200 p-6 space-y-4 shadow-xs">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+              <div>
+                <h4 class="font-black text-brand-navy text-base">Historial de Pesos</h4>
+                <p class="text-xs text-slate-400">Seguimiento biométrico por días de crianza</p>
+              </div>
+              <button onclick="openAddWeightModal()" class="bg-brand-gold hover:bg-brand-goldHover text-brand-navyDark font-black px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 transition shadow">
+                <i data-lucide="plus" class="w-4 h-4"></i> + Registrar Pesaje
+              </button>
+            </div>
+
+            <div id="poultryWeightHistoryList" class="space-y-3">
+              <!-- Dynamically populated from Neon DB -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. VISTA VENTAS (IMAGEN 1) -->
+        <div id="poultryViewVentas" class="hidden space-y-6">
+          <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
+            <div class="text-xs font-bold text-slate-400 uppercase">Total Vendido</div>
+            <div id="pvTotalVendido" class="text-4xl font-black text-brand-navy">$0 COP</div>
+            <div class="flex gap-4 text-xs text-slate-500 pt-2 border-t border-slate-100">
+              <div>Cobrado: <b id="pvCobrado" class="text-brand-navy">$0</b></div>
+              <div>•</div>
+              <div>Pendiente: <b id="pvPendiente" class="text-brand-gold">$0</b></div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4 pt-4 border-t border-slate-100 text-center">
+              <div class="p-3 bg-slate-50 rounded-2xl">
+                <div id="pvPollosVendidos" class="text-xl font-black text-slate-900">0</div>
+                <div class="text-xs text-slate-400">Pollos Vendidos</div>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-2xl">
+                <div id="pvEntregados" class="text-xl font-black text-brand-navy">0</div>
+                <div class="text-xs text-slate-400">Entregados</div>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-2xl">
+                <div id="pvDisponibles" class="text-xl font-black text-brand-gold">47</div>
+                <div class="text-xs text-slate-400">Disponibles</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filtros de pedidos -->
+          <div class="bg-white rounded-3xl border border-slate-200 p-6 space-y-4 shadow-xs">
+            <h4 class="font-black text-brand-navy text-sm">Resumen de Ventas de Tienda</h4>
+            <div id="pvOrdersCompactList" class="space-y-3 text-sm"></div>
+          </div>
+        </div>
+
+        <!-- 3. VISTA GASTOS LOTE (IMAGEN 2) -->
+        <div id="poultryViewGastos" class="hidden space-y-6">
+          <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="text-xs font-bold text-slate-400 uppercase">Total Gastado en Lote</span>
+                <div id="pgTotalGastado" class="text-3xl font-black text-slate-900 mt-1">$1.094.200 COP</div>
+              </div>
+              <button onclick="openFinanceModalWithType('Gasto')" class="bg-brand-navy text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-brand-navyDark transition">
+                + Nuevo Gasto
+              </button>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4 pt-4 border-t border-slate-100 text-center">
+              <div class="p-3 bg-slate-50 rounded-2xl">
+                <div id="pgRegistrosCount" class="text-lg font-black text-slate-900">7</div>
+                <div class="text-[11px] text-slate-400">Registros</div>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-2xl">
+                <div id="pgCostoPorPollo" class="text-lg font-black text-brand-gold">$21.884</div>
+                <div class="text-[11px] text-slate-400">Costo por Pollo</div>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-2xl">
+                <div class="text-lg font-black text-slate-800">1,5 bultos</div>
+                <div class="text-[11px] text-slate-400">Alimento Consumido</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lista de gastos -->
+          <div class="bg-white rounded-3xl border border-slate-200 p-6 space-y-3 shadow-xs">
+            <h4 class="font-black text-brand-navy text-sm mb-2">Desglose de Gastos del Lote</h4>
+            <div id="pgExpensesList" class="space-y-3"></div>
+          </div>
+        </div>
+
+        <!-- 4. VISTA INGRESOS LOTE (IMAGEN 3) -->
+        <div id="poultryViewIngresos" class="hidden space-y-6">
+          <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="text-xs font-bold text-slate-400 uppercase">Total Ingresos Recibidos</span>
+                <div id="piTotalIngresos" class="text-3xl font-black text-brand-navy mt-1">$0 COP</div>
+              </div>
+              <button onclick="openFinanceModalWithType('Ingreso')" class="bg-brand-gold text-brand-navyDark text-xs font-black px-4 py-2.5 rounded-xl hover:bg-brand-goldHover transition">
+                + Nuevo Ingreso
+              </button>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4 pt-4 border-t border-slate-100 text-center">
+              <div class="p-3 bg-slate-50 rounded-2xl">
+                <div id="piDeVentas" class="text-lg font-black text-slate-800">$0</div>
+                <div class="text-[11px] text-slate-400">De Ventas</div>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-2xl">
+                <div id="piOtros" class="text-lg font-black text-slate-800">$0</div>
+                <div class="text-[11px] text-slate-400">Otros</div>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-2xl">
+                <div id="piBalanceLote" class="text-lg font-black text-red-500">-$1.094.200</div>
+                <div class="text-[11px] text-slate-400">Balance del Lote</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-3xl border border-slate-200 p-6 space-y-3 shadow-xs">
+            <h4 class="font-black text-brand-navy text-sm mb-2">Histórico de Ingresos</h4>
+            <div id="piIncomesList" class="space-y-3"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB: DASHBOARD GENERAL -->
+      <!-- ========================================== -->
+      <section id="section-dashboard" class="admin-section hidden space-y-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex items-center justify-between">
+            <div>
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ventas de Hoy</span>
+              <div id="kpiTodaySales" class="text-2xl font-black text-brand-navy mt-1">$0 COP</div>
+              <span class="text-[11px] text-brand-gold font-bold flex items-center gap-1 mt-1">En tiempo real</span>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-brand-cream text-brand-navy flex items-center justify-center">
+              <i data-lucide="banknote" class="w-6 h-6 text-brand-gold"></i>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex items-center justify-between">
+            <div>
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ventas del Mes</span>
+              <div id="kpiMonthSales" class="text-2xl font-black text-slate-900 mt-1">$0 COP</div>
+              <span class="text-[11px] text-slate-400 mt-1 block">Acumulado mensual</span>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-brand-cream text-brand-navy flex items-center justify-center">
+              <i data-lucide="calendar" class="w-6 h-6 text-brand-gold"></i>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex items-center justify-between">
+            <div>
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pedidos Pendientes</span>
+              <div id="kpiPendingOrders" class="text-2xl font-black text-brand-gold mt-1">0</div>
+              <span class="text-[11px] text-slate-400 mt-1 block">Por despachar</span>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-brand-cream text-brand-navy flex items-center justify-center">
+              <i data-lucide="clock" class="w-6 h-6 text-brand-gold"></i>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex items-center justify-between">
+            <div>
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Utilidad Neta Est.</span>
+              <div id="kpiEstimatedProfit" class="text-2xl font-black text-brand-navy mt-1">$0 COP</div>
+              <span class="text-[11px] text-slate-400 mt-1 block">Ingresos - Gastos</span>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-brand-cream text-brand-navy flex items-center justify-center">
+              <i data-lucide="trending-up" class="w-6 h-6 text-brand-gold"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div class="lg:col-span-8 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-4">
+            <h3 class="text-base font-extrabold text-brand-navy">Histórico de Ventas (Últimos 7 Días)</h3>
+            <div class="h-72 w-full">
+              <canvas id="salesTrendChart"></canvas>
+            </div>
+          </div>
+
+          <div class="lg:col-span-4 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs flex flex-col justify-between">
+            <div>
+              <h3 class="text-base font-extrabold text-brand-navy mb-1">Estado de Inventario</h3>
+              <p class="text-xs text-slate-400 mb-6">Monitoreo de existencias en Malambo, Soledad y Barranquilla</p>
+
+              <div class="space-y-4">
+                <div class="flex justify-between items-center p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                  <span class="text-xs font-bold text-slate-700">Productos Disponibles</span>
+                  <span id="statAvailableProds" class="font-extrabold text-sm text-brand-navy">0</span>
+                </div>
+                <div class="flex justify-between items-center p-3 rounded-2xl bg-amber-50 border border-amber-100">
+                  <span class="text-xs font-bold text-amber-900">Alerta de Stock Bajo</span>
+                  <span id="statLowStockProds" class="font-extrabold text-sm text-amber-700">0</span>
+                </div>
+                <div class="flex justify-between items-center p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                  <span class="text-xs font-bold text-slate-700">Pedidos Entregados</span>
+                  <span id="statDeliveredOrders" class="font-extrabold text-sm text-slate-700">0</span>
+                </div>
+              </div>
+            </div>
+
+            <button onclick="switchAdminTab('inventory')" class="mt-6 w-full py-3 bg-brand-navy hover:bg-brand-navyDark text-white rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2">
+              <i data-lucide="boxes" class="w-4 h-4 text-brand-gold"></i> Gestionar Inventario
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB: PRODUCTOS Y FOTOGRAFÍAS -->
+      <!-- ========================================== -->
+      <section id="section-products" class="admin-section hidden space-y-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">
+          <div>
+            <h3 class="text-lg font-black text-brand-navy">Catálogo de Productos y Cortes</h3>
+            <p class="text-xs text-slate-500">Crea nuevos cortes, cambia fotos reales desde tu equipo, actualiza precios y existencias</p>
+          </div>
+          <button onclick="openProductModal()" class="bg-brand-navy hover:bg-brand-navyDark text-white font-black px-5 py-3 rounded-2xl text-sm flex items-center gap-2 transition shadow">
+            <i data-lucide="plus-circle" class="w-4 h-4 text-brand-gold"></i> Nuevo Producto
+          </button>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-700">
+              <thead class="bg-brand-cream text-brand-navy text-xs uppercase font-extrabold border-b border-brand-gold/30">
+                <tr>
+                  <th class="p-4">Producto</th>
+                  <th class="p-4">Categoría</th>
+                  <th class="p-4">Precio COP</th>
+                  <th class="p-4">Stock</th>
+                  <th class="p-4">Estado</th>
+                  <th class="p-4 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="adminProductsTableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB: INVENTARIO & KARDEX -->
+      <!-- ========================================== -->
+      <section id="section-inventory" class="admin-section hidden space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">
+            <span class="text-xs font-bold text-slate-400 uppercase">Valoración Total de Inventario</span>
+            <div id="invValuation" class="text-2xl font-black text-brand-navy mt-1">$0 COP</div>
+          </div>
+          <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">
+            <span class="text-xs font-bold text-slate-400 uppercase">Productos en Alerta de Stock</span>
+            <div id="invLowCount" class="text-2xl font-black text-amber-600 mt-1">0</div>
+          </div>
+          <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex items-center justify-between">
+            <div>
+              <span class="text-xs font-bold text-slate-400 uppercase">Registrar Movimiento</span>
+              <p class="text-xs text-slate-500">Entradas, Mermas o Ajustes</p>
+            </div>
+            <button onclick="openInventoryMovementModal()" class="bg-brand-navy hover:bg-brand-navyDark text-white font-bold px-4 py-2.5 rounded-xl text-xs transition">
+              + Registrar
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs">
+          <div class="p-6 border-b border-slate-200">
+            <h3 class="font-extrabold text-base text-brand-navy">Kardex de Existencias</h3>
+            <p class="text-xs text-slate-400">Control de entradas, ventas de clientes y bajas</p>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-700">
+              <thead class="bg-brand-cream text-brand-navy text-xs uppercase font-extrabold border-b border-slate-200">
+                <tr>
+                  <th class="p-4">Fecha</th>
+                  <th class="p-4">Producto</th>
+                  <th class="p-4">Tipo Movimiento</th>
+                  <th class="p-4">Cantidad</th>
+                  <th class="p-4">Stock Anterior</th>
+                  <th class="p-4">Nuevo Stock</th>
+                  <th class="p-4">Notas</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryMovementsBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB: PEDIDOS -->
+      <!-- ========================================== -->
+      <section id="section-orders" class="admin-section hidden space-y-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">
+          <div>
+            <h3 class="text-lg font-black text-brand-navy">Gestión de Pedidos de Clientes</h3>
+            <p class="text-xs text-slate-500">Despachos en Malambo, Soledad y Barranquilla</p>
+          </div>
+          <select id="orderStatusFilter" onchange="loadAdminOrders()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700">
+            <option value="">Todos los Estados</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="Confirmado">Confirmado</option>
+            <option value="En preparación">En preparación</option>
+            <option value="Listo">Listo</option>
+            <option value="En camino">En camino</option>
+            <option value="Entregado">Entregado</option>
+            <option value="Cancelado">Cancelado</option>
+          </select>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-700">
+              <thead class="bg-brand-cream text-brand-navy text-xs uppercase font-extrabold border-b border-slate-200">
+                <tr>
+                  <th class="p-4">Código</th>
+                  <th class="p-4">Cliente / Contacto</th>
+                  <th class="p-4">Dirección</th>
+                  <th class="p-4">Total</th>
+                  <th class="p-4">Pago</th>
+                  <th class="p-4">Estado</th>
+                  <th class="p-4 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="adminOrdersTableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB: CALCULADORA INTELIGENTE -->
+      <!-- ========================================== -->
+      <section id="section-calculator" class="admin-section hidden space-y-8">
+        <div class="bg-gradient-to-r from-brand-navyDark via-brand-navy to-slate-900 text-white p-8 rounded-3xl shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border border-brand-gold/30">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-gold text-brand-navyDark text-xs font-black uppercase tracking-wider mb-2">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Motor Matemático Avícola
+            </div>
+            <h3 class="text-2xl sm:text-3xl font-black">Calculadora de Costos y Precios</h3>
+            <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-xl">
+              Calcula con exactitud los costos de producción y comercialización avícola, recomendando precios y márgenes de utilidad.
+            </p>
+          </div>
+
+          <div class="flex bg-slate-900/80 p-1.5 rounded-2xl border border-brand-gold/40">
+            <button onclick="switchCalcMode('crianza')" id="calcModeBtnCrianza" class="px-5 py-2.5 rounded-xl font-bold text-xs transition bg-brand-gold text-brand-navyDark shadow">
+              Modo 1: Crianza (Granja)
+            </button>
+            <button onclick="switchCalcMode('comercializacion')" id="calcModeBtnComercial" class="px-5 py-2.5 rounded-xl font-bold text-xs transition text-slate-300 hover:text-white">
+              Modo 2: Comercialización
+            </button>
+          </div>
+        </div>
+
+        <!-- MODO 1: CRIANZA -->
+        <div id="calcViewCrianza" class="space-y-6">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-7 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-6">
+              <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+                <h4 class="font-extrabold text-brand-navy text-base">Parámetros del Lote</h4>
+                <button onclick="resetBreedingForm()" class="text-xs text-slate-400 hover:text-red-500 font-bold">Limpiar</button>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Cantidad de Pollos *</label>
+                  <input type="number" id="brChickens" value="1000" oninput="runBreedingCalcLive()" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm font-semibold">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Precio Pollito 1 Día ($) *</label>
+                  <input type="number" id="brPricePerBird" value="3200" oninput="runBreedingCalcLive()" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm font-semibold">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Mortalidad Estimada (%) *</label>
+                  <input type="number" step="0.5" id="brMortality" value="4.0" oninput="runBreedingCalcLive()" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm font-semibold">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Alimento Total (Kg) *</label>
+                  <input type="number" id="brFeedKg" value="4800" oninput="runBreedingCalcLive()" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm font-semibold">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Precio Alimento / Kg ($) *</label>
+                  <input type="number" id="brFeedPriceKg" value="2300" oninput="runBreedingCalcLive()" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm font-semibold">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Peso Final (Kg) *</label>
+                  <input type="number" step="0.1" id="brFinalWeight" value="2.4" oninput="runBreedingCalcLive()" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm font-semibold">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Medicamentos ($)</label>
+                  <input type="number" id="brMeds" value="150000" oninput="runBreedingCalcLive()" class="w-full p-2 rounded-xl border border-slate-200 text-xs">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Vitaminas ($)</label>
+                  <input type="number" id="brVitamins" value="80000" oninput="runBreedingCalcLive()" class="w-full p-2 rounded-xl border border-slate-200 text-xs">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Vacunas ($)</label>
+                  <input type="number" id="brVaccines" value="120000" oninput="runBreedingCalcLive()" class="w-full p-2 rounded-xl border border-slate-200 text-xs">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Mano de Obra ($)</label>
+                  <input type="number" id="brLabor" value="1200000" oninput="runBreedingCalcLive()" class="w-full p-2 rounded-xl border border-slate-200 text-xs">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-brand-navy mb-1">Margen de Ganancia Deseado (%)</label>
+                <div class="flex items-center gap-3">
+                  <input type="range" min="5" max="60" value="25" id="brTargetMargin" oninput="document.getElementById('brMarginDisplay').textContent = this.value + '%'; runBreedingCalcLive()" class="flex-1 accent-brand-gold">
+                  <span id="brMarginDisplay" class="font-black text-brand-navy text-sm w-12 text-right">25%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="lg:col-span-5 bg-brand-navyDark text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col justify-between space-y-6 border border-brand-gold/30">
+              <div>
+                <div class="flex justify-between items-center mb-4">
+                  <h4 class="text-brand-gold font-black text-sm uppercase tracking-wider">Resultados de Costos y Precios</h4>
+                  <span class="text-[10px] bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full font-bold">Tiempo Real</span>
+                </div>
+
+                <div class="space-y-3 text-sm">
+                  <div class="flex justify-between pb-2 border-b border-slate-800">
+                    <span class="text-slate-400">Inversión Total:</span>
+                    <span id="resBrTotalInvest" class="font-extrabold text-white text-base">$0 COP</span>
+                  </div>
+                  <div class="flex justify-between pb-2 border-b border-slate-800">
+                    <span class="text-slate-400">Aves Sobrevivientes:</span>
+                    <span id="resBrSurviving" class="font-bold text-brand-gold">0 aves</span>
+                  </div>
+                  <div class="flex justify-between pb-2 border-b border-slate-800">
+                    <span class="text-slate-400">Costo por Pollo:</span>
+                    <span id="resBrCostPerChicken" class="font-bold text-white">$0 COP</span>
+                  </div>
+                  <div class="flex justify-between pb-2 border-b border-slate-800">
+                    <span class="text-slate-400">Costo Real por Kg:</span>
+                    <span id="resBrCostKg" class="font-bold text-brand-goldLight">$0 COP</span>
+                  </div>
+                  <div class="flex justify-between pb-2 border-b border-slate-800">
+                    <span class="text-slate-400">Costo Real por Libra:</span>
+                    <span id="resBrCostLb" class="font-bold text-slate-300">$0 COP</span>
+                  </div>
+
+                  <div class="bg-brand-navy p-4 rounded-2xl border border-brand-gold/40 mt-4 space-y-2">
+                    <div class="text-xs font-black text-brand-gold uppercase">Precios Recomendados de Venta</div>
+                    <div class="flex justify-between text-base font-black text-white">
+                      <span>Sugerido por Pollo:</span>
+                      <span id="resBrRecChicken" class="text-brand-gold text-lg">$0</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-200">
+                      <span>Sugerido por Kilogramo:</span>
+                      <span id="resBrRecKg" class="font-bold text-brand-goldLight">$0 / Kg</span>
+                    </div>
+                    <div class="flex justify-between text-xs pt-2 border-t border-slate-700">
+                      <span>Ganancia Neta Estimada:</span>
+                      <span id="resBrProfit" class="font-extrabold text-brand-gold">$0 COP</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-2 pt-4">
+                <button onclick="saveCalculationPrompt('crianza')" class="w-full bg-brand-gold hover:bg-brand-goldHover text-brand-navyDark font-black py-3 rounded-xl transition flex items-center justify-center gap-2 text-xs">
+                  <i data-lucide="save" class="w-4 h-4"></i> Guardar Este Cálculo
+                </button>
+                <button onclick="openApplyPriceModal('crianza')" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl transition text-xs flex items-center justify-center gap-2 border border-brand-gold/30">
+                  <i data-lucide="arrow-up-circle" class="w-4 h-4 text-brand-gold"></i> Aplicar Precio al Catálogo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODO 2: COMERCIALIZACIÓN -->
+        <div id="calcViewComercial" class="hidden space-y-6">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-7 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-6">
+              <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+                <h4 class="font-extrabold text-brand-navy text-base">Parámetros de Compra y Distribución</h4>
+                <button onclick="resetCommercialForm()" class="text-xs text-slate-400 hover:text-red-500 font-bold">Limpiar</button>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Pollos Comprados *</label>
+                  <input type="number" id="comChickens" value="500" oninput="runCommercialCalcLive()" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm font-semibold">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Precio Compra x Pollo ($) *</label>
+                  <input type="number" id="comPricePerUnit" value="16500" oninput="runCommercialCalcLive()" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm font-semibold">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Peso Promedio (Kg) *</label>
+                  <input type="number" step="0.1" id="comAvgWeight" value="2.3" oninput="runCommercialCalcLive()" class="w-full p-2.5 rounded-xl border border-slate-200 text-sm font-semibold">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Transporte y Flete ($)</label>
+                  <input type="number" id="comTransport" value="350000" oninput="runCommercialCalcLive()" class="w-full p-2 rounded-xl border border-slate-200 text-xs">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Procesamiento / Despiece</label>
+                  <input type="number" id="comProcessing" value="250000" oninput="runCommercialCalcLive()" class="w-full p-2 rounded-xl border border-slate-200 text-xs">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Empaque y Bolsas ($)</label>
+                  <input type="number" id="comPackaging" value="150000" oninput="runCommercialCalcLive()" class="w-full p-2 rounded-xl border border-slate-200 text-xs">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-brand-navy mb-1">Porcentaje de Utilidad Deseado (%)</label>
+                <div class="flex items-center gap-3">
+                  <input type="range" min="5" max="60" value="25" id="comDesiredMargin" oninput="document.getElementById('comMarginDisplay').textContent = this.value + '%'; runCommercialCalcLive()" class="flex-1 accent-brand-gold">
+                  <span id="comMarginDisplay" class="font-black text-brand-navy text-sm w-12 text-right">25%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="lg:col-span-5 bg-brand-navyDark text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col justify-between space-y-6 border border-brand-gold/30">
+              <div>
+                <h4 class="text-brand-gold font-black text-sm uppercase tracking-wider mb-4">Resultados de Comercialización</h4>
+                <div class="space-y-3 text-sm">
+                  <div class="flex justify-between pb-2 border-b border-slate-800">
+                    <span class="text-slate-400">Costo Total Integral:</span>
+                    <span id="resComTotalCost" class="font-extrabold text-brand-gold text-base">$0 COP</span>
+                  </div>
+                  <div class="flex justify-between pb-2 border-b border-slate-800">
+                    <span class="text-slate-400">Costo Unitario:</span>
+                    <span id="resComCostUnit" class="font-bold text-white">$0 COP</span>
+                  </div>
+                  <div class="flex justify-between pb-2 border-b border-slate-800">
+                    <span class="text-slate-400">Costo por Kilogramo:</span>
+                    <span id="resComCostKg" class="font-bold text-slate-300">$0 COP</span>
+                  </div>
+
+                  <div class="bg-brand-navy p-4 rounded-2xl border border-brand-gold/40 mt-4 space-y-2">
+                    <div class="text-xs font-black text-brand-gold uppercase">Precios Sugeridos</div>
+                    <div class="flex justify-between text-base font-black text-white">
+                      <span>Precio Sugerido x Pollo:</span>
+                      <span id="resComRecChicken" class="text-brand-gold text-lg">$0</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-200">
+                      <span>Precio Sugerido x Kg:</span>
+                      <span id="resComRecKg" class="font-bold text-brand-goldLight">$0 / Kg</span>
+                    </div>
+                    <div class="flex justify-between text-xs pt-2 border-t border-slate-700">
+                      <span>Ganancia Total Estimada:</span>
+                      <span id="resComTotalProfit" class="font-extrabold text-brand-gold">$0 COP</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-2 pt-4">
+                <button onclick="saveCalculationPrompt('comercializacion')" class="w-full bg-brand-gold hover:bg-brand-goldHover text-brand-navyDark font-black py-3 rounded-xl transition flex items-center justify-center gap-2 text-xs">
+                  <i data-lucide="save" class="w-4 h-4"></i> Guardar Este Cálculo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-4 shadow-xs">
+          <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+            <h4 class="font-extrabold text-brand-navy text-base">Historial de Cálculos Guardados</h4>
+            <button onclick="loadSavedCalculations()" class="text-xs font-bold text-brand-navy hover:text-brand-gold flex items-center gap-1">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Actualizar
+            </button>
+          </div>
+          <div id="savedCalculationsList" class="space-y-3"></div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB: CLIENTES CRM -->
+      <!-- ========================================== -->
+      <section id="section-customers" class="admin-section hidden space-y-6">
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">
+          <h3 class="text-lg font-black text-brand-navy">Directorio de Clientes</h3>
+          <p class="text-xs text-slate-500">Historial de compradores en Malambo, Soledad y Barranquilla</p>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-700">
+              <thead class="bg-brand-cream text-brand-navy text-xs uppercase font-extrabold border-b border-slate-200">
+                <tr>
+                  <th class="p-4">Nombre Completo</th>
+                  <th class="p-4">Correo</th>
+                  <th class="p-4">Teléfono</th>
+                  <th class="p-4">Dirección</th>
+                  <th class="p-4">Barrio / Municipio</th>
+                  <th class="p-4">Fecha Registro</th>
+                </tr>
+              </thead>
+              <tbody id="adminCustomersTableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB: FINANZAS & COSTOS -->
+      <!-- ========================================== -->
+      <section id="section-finances" class="admin-section hidden space-y-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">
+          <div>
+            <h3 class="text-lg font-black text-brand-navy">Control Financiero General</h3>
+            <p class="text-xs text-slate-500">Ingresos, costos de granja, alimentos y gastos operativos</p>
+          </div>
+          <button onclick="openFinanceModal()" class="bg-brand-navy hover:bg-brand-navyDark text-white font-bold px-4 py-3 rounded-2xl text-xs flex items-center gap-2 transition">
+            <i data-lucide="plus" class="w-4 h-4 text-brand-gold"></i> Registrar Movimiento Contable
+          </button>
+        </div>
+
+        <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-700">
+              <thead class="bg-brand-cream text-brand-navy text-xs uppercase font-extrabold border-b border-slate-200">
+                <tr>
+                  <th class="p-4">Fecha</th>
+                  <th class="p-4">Tipo</th>
+                  <th class="p-4">Categoría</th>
+                  <th class="p-4">Descripción</th>
+                  <th class="p-4 text-right">Monto</th>
+                </tr>
+              </thead>
+              <tbody id="adminFinancesTableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB: PROVEEDORES -->
+      <!-- ========================================== -->
+      <section id="section-suppliers" class="admin-section hidden space-y-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">
+          <div>
+            <h3 class="text-lg font-black text-brand-navy">Proveedores Avícolas</h3>
+            <p class="text-xs text-slate-500">Granjas aliadas, alimentos e insumos de cría</p>
+          </div>
+          <button onclick="openSupplierModal()" class="bg-brand-navy hover:bg-brand-navyDark text-white font-bold px-4 py-3 rounded-2xl text-xs flex items-center gap-2 transition">
+            <i data-lucide="plus" class="w-4 h-4 text-brand-gold"></i> + Nuevo Proveedor
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="suppliersCardsContainer"></div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB: REPORTES & EXPORTACIÓN -->
+      <!-- ========================================== -->
+      <section id="section-reports" class="admin-section hidden space-y-6">
+        <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 space-y-4 shadow-xs">
+          <h3 class="text-xl font-black text-brand-navy">Centro de Informes y Exportación</h3>
+          <p class="text-xs text-slate-500">Descarga reportes consolidados en formato CSV compatible con Microsoft Excel</p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4">
+            <div class="p-5 rounded-2xl border border-slate-200 bg-slate-50 space-y-3">
+              <h4 class="font-bold text-brand-navy text-sm">Reporte de Ventas</h4>
+              <p class="text-xs text-slate-500">Historial de órdenes con compradores y despachos.</p>
+              <button onclick="exportReports('ventas')" class="w-full py-2.5 bg-brand-navy hover:bg-brand-navyDark text-white rounded-xl text-xs font-bold transition">
+                Descargar CSV
+              </button>
+            </div>
+            <div class="p-5 rounded-2xl border border-slate-200 bg-slate-50 space-y-3">
+              <h4 class="font-bold text-brand-navy text-sm">Reporte de Inventario</h4>
+              <p class="text-xs text-slate-500">Stock por producto, valoración y existencias mínimas.</p>
+              <button onclick="exportReports('inventario')" class="w-full py-2.5 bg-brand-navy hover:bg-brand-navyDark text-white rounded-xl text-xs font-bold transition">
+                Descargar CSV
+              </button>
+            </div>
+            <div class="p-5 rounded-2xl border border-slate-200 bg-slate-50 space-y-3">
+              <h4 class="font-bold text-brand-navy text-sm">Reporte de Finanzas</h4>
+              <p class="text-xs text-slate-500">Ingresos, costos de galpón y utilidad neta.</p>
+              <button onclick="exportReports('finanzas')" class="w-full py-2.5 bg-brand-navy hover:bg-brand-navyDark text-white rounded-xl text-xs font-bold transition">
+                Descargar CSV
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB: CONFIGURACIÓN -->
+      <!-- ========================================== -->
+      <section id="section-settings" class="admin-section hidden space-y-6">
+        <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 space-y-6 max-w-4xl shadow-xs">
+          <div>
+            <h3 class="text-xl font-black text-brand-navy">Configuración Comercial</h3>
+            <p class="text-xs text-slate-500">Datos oficiales de contacto, tarifas de domicilio y horarios</p>
+          </div>
+
+          <form id="businessSettingsForm" onsubmit="saveBusinessSettings(event)" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Nombre Comercial</label>
+                <input type="text" id="setBusinessName" required class="w-full p-3 rounded-xl border border-slate-200 text-sm font-semibold">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Eslogan</label>
+                <input type="text" id="setTagline" required class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Teléfono</label>
+                <input type="text" id="setPhone" required class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">WhatsApp</label>
+                <input type="text" id="setWhatsapp" required class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Correo Electrónico</label>
+                <input type="email" id="setEmail" required class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Ubicación / Cobertura</label>
+                <input type="text" id="setCity" required class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Dirección de Despacho</label>
+                <input type="text" id="setAddress" required class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+              </div>
+            </div>
+
+            <button type="submit" class="bg-brand-navy hover:bg-brand-navyDark text-white font-black px-6 py-3.5 rounded-2xl text-sm transition shadow flex items-center gap-2">
+              <i data-lucide="save" class="w-4 h-4 text-brand-gold"></i> Guardar Configuración
+            </button>
+          </form>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- MODALS -->
+
+  <!-- PRODUCT CREATE/EDIT MODAL -->
+  <div id="productModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-8 animate-fade-in max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-6">
+        <h3 id="productModalTitle" class="text-xl font-black text-brand-navy">Editar Producto y Fotografía</h3>
+        <button onclick="closeProductModal()" class="text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="productForm" onsubmit="saveProduct(event)" class="space-y-4">
+        <input type="hidden" id="prodEditId">
+        
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nombre del Producto *</label>
+          <input type="text" id="prodName" required placeholder="Ej: Pechuga Deshuesada" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Categoría</label>
+            <select id="prodCategory" class="w-full p-3 rounded-xl border border-slate-200 text-sm"></select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Unidad de Medida *</label>
+            <select id="prodUnit" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+              <option value="Kg">Kilogramo (Kg)</option>
+              <option value="Libra">Libra</option>
+              <option value="Unidad">Unidad (Pollo Entero)</option>
+              <option value="Bandeja">Bandeja</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Precio Unitario (COP) *</label>
+            <input type="number" id="prodPrice" required step="100" class="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Stock Inicial *</label>
+            <input type="number" id="prodStock" required step="0.5" class="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold">
+          </div>
+        </div>
+
+        <!-- Subir Fotografía -->
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-slate-700">Fotografía del Producto (Desde tu Equipo)</label>
+          <div class="flex items-center gap-4">
+            <div id="imagePreviewContainer" class="w-16 h-16 rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center flex-shrink-0">
+              <img id="prodImagePreview" src="" alt="Vista previa" class="w-full h-full object-cover hidden">
+              <i id="prodImagePlaceholder" data-lucide="image" class="w-6 h-6 text-slate-400"></i>
+            </div>
+            <div class="flex-1">
+              <input type="file" id="prodImageFile" accept="image/*" onchange="handleImageFileSelected(event)" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-brand-navy file:text-white hover:file:bg-brand-navyDark cursor-pointer">
+              <span id="uploadStatusText" class="text-[11px] text-slate-400 block mt-1">Sube una foto real desde tu PC, teléfono o tablet (JPG, PNG, WEBP).</span>
+            </div>
+          </div>
+          <input type="hidden" id="prodImageUrl">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Descripción</label>
+          <textarea id="prodDescription" rows="2" class="w-full p-3 rounded-xl border border-slate-200 text-sm"></textarea>
+        </div>
+
+        <div class="flex items-center gap-6 pt-2">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" id="prodIsActive" checked class="accent-brand-navy">
+            <span class="text-xs font-bold text-slate-700">Activo en Tienda</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" id="prodIsFeatured" class="accent-brand-gold">
+            <span class="text-xs font-bold text-slate-700">Producto Destacado</span>
+          </label>
+        </div>
+
+        <button type="submit" class="w-full bg-brand-navy hover:bg-brand-navyDark text-white font-black py-3.5 rounded-xl transition shadow">
+          Guardar Producto
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTRAR PESAJE DE POLLOS EN GALPÓN -->
+  <div id="addWeightModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-fade-in">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-black text-brand-navy">Registrar Pesaje de Lote</h3>
+        <button onclick="closeAddWeightModal()" class="text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="addWeightForm" onsubmit="submitWeightRecord(event)" class="space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Día del Lote *</label>
+            <input type="number" id="wDayNumber" required placeholder="Ej: 15" class="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Peso Promedio (g) *</label>
+            <input type="number" step="1" id="wAvgWeight" required placeholder="Ej: 520" class="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold text-brand-navy">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Diagnóstico / Estado</label>
+          <select id="wStatusLabel" class="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold">
+            <option value="Bien de peso">✓ Bien de peso</option>
+            <option value="Le falta peso">⚠️ Le falta peso</option>
+            <option value="Excelente desarrollo">⭐ Excelente desarrollo</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Observaciones</label>
+          <input type="text" id="wNotes" placeholder="Ej: Pesaje muestra de 10 aves al azar..." class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+        </div>
+
+        <button type="submit" class="w-full bg-brand-gold hover:bg-brand-goldHover text-brand-navyDark font-black py-3.5 rounded-xl transition shadow">
+          Guardar Registro de Pesaje
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- INVENTORY MOVEMENT MODAL -->
+  <div id="invMovementModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-fade-in">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-black text-brand-navy">Movimiento de Inventario</h3>
+        <button onclick="closeInventoryMovementModal()" class="text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="invMovementForm" onsubmit="saveInventoryMovement(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Producto *</label>
+          <select id="movProductId" required class="w-full p-3 rounded-xl border border-slate-200 text-sm"></select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Tipo de Movimiento *</label>
+            <select id="movType" required class="w-full p-3 rounded-xl border border-slate-200 text-sm font-semibold">
+              <option value="Entrada">Entrada (Compra/Recepción)</option>
+              <option value="Pérdida / Merma">Pérdida / Merma</option>
+              <option value="Ajuste manual">Ajuste de Stock</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Cantidad *</label>
+            <input type="number" step="0.5" id="movQuantity" required placeholder="0.0" class="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Notas / Motivo</label>
+          <input type="text" id="movNotes" placeholder="Ej: Recepción lote #402" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+        </div>
+
+        <button type="submit" class="w-full bg-brand-navy hover:bg-brand-navyDark text-white font-bold py-3.5 rounded-xl transition shadow">
+          Registrar en Kardex
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- FINANCE MODAL -->
+  <div id="financeModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-fade-in">
+      <div class="flex justify-between items-center mb-6">
+        <h3 id="financeModalTitle" class="text-xl font-black text-brand-navy">Registrar Movimiento Financiero</h3>
+        <button onclick="closeFinanceModal()" class="text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="financeForm" onsubmit="saveFinanceRecord(event)" class="space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Tipo *</label>
+            <select id="finType" required class="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold">
+              <option value="Gasto">Gasto del Lote</option>
+              <option value="Ingreso">Ingreso</option>
+              <option value="Compra Materia Prima">Compra Materia Prima</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Categoría *</label>
+            <input type="text" id="finCategory" required placeholder="Ej: Alimento, Vitaminas, Bebedero" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Monto (COP) *</label>
+          <input type="number" id="finAmount" required placeholder="Ej: 94000" class="w-full p-3 rounded-xl border border-slate-200 text-sm font-black text-brand-navy">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Descripción / Detalle</label>
+          <input type="text" id="finDesc" placeholder="Ej: 1 Bultos (40kg) - Inicio" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+        </div>
+
+        <button type="submit" class="w-full bg-brand-navy hover:bg-brand-navyDark text-white font-bold py-3.5 rounded-xl transition shadow">
+          Registrar en Base de Datos
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SUPPLIER MODAL -->
+  <div id="supplierModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-fade-in">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-black text-brand-navy">Registrar Proveedor</h3>
+        <button onclick="closeSupplierModal()" class="text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="supplierForm" onsubmit="saveSupplier(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nombre de la Granja o Empresa *</label>
+          <input type="text" id="supName" required placeholder="Ej: Granja El Porvenir" class="w-full p-3 rounded-xl border border-slate-200 text-sm font-semibold">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Contacto Comercial</label>
+          <input type="text" id="supContact" placeholder="Ej: Ing. Fernando Morales" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Teléfono</label>
+            <input type="text" id="supPhone" placeholder="310..." class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Correo Electrónico</label>
+            <input type="email" id="supEmail" placeholder="ventas@granja.com" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Insumos que Suministra</label>
+          <input type="text" id="supProducts" placeholder="Ej: Pollitos de 1 día, Alimento concentrado" class="w-full p-3 rounded-xl border border-slate-200 text-sm">
+        </div>
+
+        <button type="submit" class="w-full bg-brand-navy hover:bg-brand-navyDark text-white font-bold py-3.5 rounded-xl transition shadow">
+          Guardar Proveedor
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ORDER DETAIL MODAL -->
+  <div id="adminOrderDetailModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-8 animate-fade-in max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h3 id="adminDetailOrderCode" class="text-xl font-black text-brand-navy">Pedido #</h3>
+        <button onclick="closeAdminOrderDetailModal()" class="text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="adminDetailOrderContent" class="space-y-4 text-sm"></div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/static/js/admin.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FRANCO'S POLLO – El Pollo de Cada Hogar | Malambo, Soledad y Barranquilla</title>
+  <link rel="icon" type="image/svg+xml" href="/static/images/logo.svg">
+  <!-- Tailwind CSS con Paleta Oficial Franco's Pollo -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#0f2a4a',       // Azul Oscuro Principal de Marca
+              navyDark: '#091a2f',   // Azul Profundo
+              navyLight: '#1c3e66',  // Azul Medio
+              gold: '#c59b4c',       // Dorado Trigo Oficial
+              goldHover: '#b3883b',  // Dorado Hover
+              goldLight: '#e5b869',  // Dorado Claro
+              cream: '#f8f6f0',      // Crema de Fondo Institucional
+              surface: '#ffffff'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+
+  <!-- TOP BANNER (Sin números ni accesos a admin expuestos) -->
+  <div class="bg-brand-navyDark text-white text-xs sm:text-sm py-2 px-4 border-b border-brand-gold/30">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+      <div class="flex items-center space-x-3">
+        <span class="bg-brand-gold text-brand-navyDark font-extrabold px-2.5 py-0.5 rounded-full text-[11px] uppercase tracking-wider">Despacho Diario</span>
+        <span>🍗 <b>FRANCO'S POLLO</b> – El Pollo de Cada Hogar • Envíos gratis por compras superiores a <b>$60.000 COP</b></span>
+      </div>
+      <div class="flex items-center space-x-2 text-xs font-bold text-brand-goldLight">
+        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-brand-gold"></i>
+        <span>Sedes: Malambo • Soledad • Barranquilla</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVIGATION -->
+  <header class="sticky top-0 z-40 glass-nav border-b border-slate-200 shadow-xs transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-20">
+        <!-- Logo Oficial HD -->
+        <a href="/" class="flex items-center space-x-3 group">
+          <img src="/static/images/logo_badge.jpg" alt="Franco's Pollo" class="h-14 w-14 rounded-full border-2 border-brand-gold object-cover shadow-sm transition-transform group-hover:scale-105">
+          <div class="flex flex-col">
+            <span class="text-xl sm:text-2xl font-black text-brand-navy tracking-tight leading-none group-hover:text-brand-navyDark transition-colors">
+              FRANCO'S <span class="text-brand-gold">POLLO</span>
+            </span>
+            <span class="text-[9px] sm:text-[10px] font-extrabold text-slate-500 tracking-[0.25em] mt-1">
+              EL POLLO DE CADA HOGAR
+            </span>
+          </div>
+        </a>
+
+        <!-- Desktop Menu -->
+        <nav class="hidden md:flex space-x-6 text-sm font-bold text-slate-700 items-center">
+          <a href="#inicio" class="hover:text-brand-navy transition-colors flex items-center gap-1">Inicio</a>
+          <a href="#catalogo" class="hover:text-brand-navy transition-colors flex items-center gap-1">Catálogo de Pollo</a>
+          <a href="#cobertura" class="hover:text-brand-navy transition-colors flex items-center gap-1">Puntos de Venta</a>
+          <a href="#beneficios" class="hover:text-brand-navy transition-colors flex items-center gap-1">Calidad Franco's</a>
+          <!-- Opción Mis Pedidos visible directamente en el menú de navegación -->
+          <button onclick="openMyOrdersModal()" class="px-3.5 py-1.5 rounded-xl bg-brand-gold/15 hover:bg-brand-gold/25 text-brand-navy border border-brand-gold/40 flex items-center gap-1.5 font-black transition">
+            <i data-lucide="package" class="w-4 h-4 text-brand-gold"></i> Mis Pedidos
+          </button>
+          <button onclick="openTrackOrderModal()" class="text-slate-500 hover:text-brand-navy flex items-center gap-1 text-xs">
+            <i data-lucide="search" class="w-3.5 h-3.5"></i> Rastrear Código
+          </button>
+        </nav>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center space-x-3">
+          <!-- User / Auth -->
+          <div id="userAuthSection" class="relative">
+            <button id="userMenuBtn" onclick="toggleUserDropdown()" class="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 transition">
+              <i data-lucide="user" class="w-5 h-5 text-brand-navy"></i>
+              <span id="userNameLabel" class="hidden sm:inline">Mi Cuenta</span>
+            </button>
+            <!-- Dropdown -->
+            <div id="userDropdown" class="hidden absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-50">
+              <div id="authGuestMenu">
+                <button onclick="openAuthModal('login')" class="w-full text-left px-3 py-2 rounded-lg text-sm text-slate-700 hover:bg-slate-50 hover:text-brand-navy flex items-center gap-2">
+                  <i data-lucide="log-in" class="w-4 h-4 text-brand-gold"></i> Iniciar Sesión
+                </button>
+                <button onclick="openAuthModal('register')" class="w-full text-left px-3 py-2 rounded-lg text-sm text-slate-700 hover:bg-slate-50 hover:text-brand-navy flex items-center gap-2">
+                  <i data-lucide="user-plus" class="w-4 h-4 text-brand-gold"></i> Crear Cuenta
+                </button>
+              </div>
+              <div id="authLoggedInMenu" class="hidden">
+                <div class="px-3 py-2 border-b border-slate-100 text-xs text-slate-500">
+                  Conectado como <br><span id="userEmailDisplay" class="font-bold text-slate-800"></span>
+                </div>
+                <button onclick="openMyOrdersModal()" class="w-full text-left px-3 py-2 rounded-lg text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2 mt-1">
+                  <i data-lucide="package" class="w-4 h-4 text-brand-gold"></i> Mis Pedidos
+                </button>
+                <button onclick="logoutCustomer()" class="w-full text-left px-3 py-2 rounded-lg text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 mt-1">
+                  <i data-lucide="log-out" class="w-4 h-4 text-red-500"></i> Cerrar Sesión
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cart Button -->
+          <button onclick="toggleCartDrawer(true)" class="relative bg-brand-navy hover:bg-brand-navyDark text-white p-3 rounded-2xl shadow-md transition-all flex items-center gap-2">
+            <i data-lucide="shopping-cart" class="w-5 h-5 text-brand-gold"></i>
+            <span id="cartTotalHeader" class="hidden sm:inline font-black text-sm">$0</span>
+            <span id="cartBadge" class="absolute -top-1.5 -right-1.5 bg-brand-gold text-brand-navyDark text-[11px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">0</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section id="inicio" class="relative bg-gradient-to-br from-brand-navyDark via-brand-navy to-slate-900 text-white overflow-hidden py-16 lg:py-24">
+    <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#c59b4c_1px,transparent_1px)] [background-size:24px_24px]"></div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <!-- Text Left -->
+        <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-navyDark/90 border border-brand-gold/50 text-brand-gold text-xs sm:text-sm font-bold tracking-wide">
+            <i data-lucide="award" class="w-4 h-4 text-brand-gold"></i> EL POLLO DE CADA HOGAR
+          </div>
+
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight">
+            Pollo Fresco de Máxima Calidad <br>
+            <span class="text-brand-gold">En Malambo, Soledad y Barranquilla</span>
+          </h1>
+
+          <p class="text-slate-200 text-base sm:text-lg max-w-2xl font-normal leading-relaxed">
+            En <b>FRANCO'S POLLO</b> garantizamos pureza, frescura diaria, pesaje exacto y cadena de frío rigurosa de granja a tu mesa para hogares, restaurantes y asaderos.
+          </p>
+
+          <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
+            <a href="#catalogo" class="bg-brand-gold hover:bg-brand-goldHover text-brand-navyDark font-black px-8 py-4 rounded-2xl shadow-xl shadow-brand-gold/20 text-center transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-3">
+              <i data-lucide="shopping-bag" class="w-5 h-5"></i> Comprar Ahora
+            </a>
+            <a href="https://wa.me/573206565410?text=Hola%20FRANCO'S%20POLLO,%20deseo%20m%C3%A1s%20informaci%C3%B3n%20sobre%20pedidos%20en%20Malambo,%20Soledad%20y%20Barranquilla" target="_blank" class="bg-slate-800/80 hover:bg-slate-700 border border-brand-gold/40 text-white font-bold px-6 py-4 rounded-2xl text-center transition-all flex items-center justify-center gap-3">
+              <svg class="w-5 h-5 fill-current text-green-400" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.044c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.159.57 4.185 1.564 5.938l-1.564 5.719 5.873-1.54c1.707.933 3.667 1.464 5.748 1.464 6.627 0 12-5.373 12-12 0-6.627-5.373-12-12-12z"/>
+              </svg>
+              <span>WhatsApp Directo</span>
+            </a>
+          </div>
+
+          <!-- Feature badges -->
+          <div class="grid grid-cols-3 gap-4 pt-6 border-t border-slate-800 max-w-lg mx-auto lg:mx-0 text-left">
+            <div>
+              <div class="text-brand-gold font-black text-xl sm:text-2xl">MALAMBO</div>
+              <div class="text-xs text-slate-300">Despacho Central</div>
+            </div>
+            <div>
+              <div class="text-brand-gold font-black text-xl sm:text-2xl">SOLEDAD</div>
+              <div class="text-xs text-slate-300">Rutas Diarias</div>
+            </div>
+            <div>
+              <div class="text-brand-gold font-black text-xl sm:text-2xl">BARRANQUILLA</div>
+              <div class="text-xs text-slate-300">Hogares & Negocios</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Insignia Oficial HD -->
+        <div class="lg:col-span-5 relative flex justify-center">
+          <div class="relative max-w-sm w-full">
+            <div class="absolute -inset-2 bg-gradient-to-r from-brand-gold to-brand-navy rounded-full blur-2xl opacity-40 animate-pulse"></div>
+            <!-- Logo Oficial Circular HD -->
+            <div class="relative bg-brand-cream p-1 rounded-full border-4 border-brand-gold shadow-2xl overflow-hidden aspect-square flex items-center justify-center">
+              <img src="/static/images/logo_badge.jpg" alt="Logo Insignia Franco's Pollo HD" class="w-full h-full object-cover rounded-full transform hover:scale-105 transition-transform duration-500">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CIUDADES / SEDES DE ATENCIÓN STRIP -->
+  <section id="cobertura" class="py-6 bg-brand-cream border-y border-brand-gold/30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-4 text-center sm:text-left">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-brand-navy text-brand-gold flex items-center justify-center">
+            <i data-lucide="map-pin" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-black text-brand-navy text-sm uppercase tracking-wide">Puntos de Distribución & Domicilio Inmediato</h3>
+            <p class="text-xs text-slate-600">Atención directa a asaderos, restaurantes, puntos de venta y familias</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 flex-wrap justify-center">
+          <span class="px-3.5 py-1.5 rounded-full bg-white border border-brand-gold/40 text-brand-navy text-xs font-black shadow-xs flex items-center gap-1.5">
+            <i data-lucide="check" class="w-3.5 h-3.5 text-brand-gold"></i> Malambo
+          </span>
+          <span class="px-3.5 py-1.5 rounded-full bg-white border border-brand-gold/40 text-brand-navy text-xs font-black shadow-xs flex items-center gap-1.5">
+            <i data-lucide="check" class="w-3.5 h-3.5 text-brand-gold"></i> Soledad
+          </span>
+          <span class="px-3.5 py-1.5 rounded-full bg-white border border-brand-gold/40 text-brand-navy text-xs font-black shadow-xs flex items-center gap-1.5">
+            <i data-lucide="check" class="w-3.5 h-3.5 text-brand-gold"></i> Barranquilla
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORIES FILTER STRIP -->
+  <section class="py-8 bg-white border-b border-slate-200 sticky top-20 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold text-brand-navy flex items-center gap-2">
+          <i data-lucide="layout-grid" class="w-5 h-5 text-brand-gold"></i> Categorías de Productos
+        </h2>
+        <span class="text-xs text-slate-500">Selecciona para filtrar</span>
+      </div>
+
+      <!-- Categories Pills Horizontal Scroll -->
+      <div id="categoriesList" class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+        <button onclick="filterCategory(null)" id="cat-btn-all" class="cat-pill active flex-shrink-0 px-4 py-2.5 rounded-xl text-sm font-bold transition-all bg-brand-navy text-white shadow-sm flex items-center gap-2">
+          <i data-lucide="check-circle" class="w-4 h-4"></i> Todos
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCT CATALOG -->
+  <section id="catalogo" class="py-12 bg-slate-50 flex-1">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Search & Sorting Bar -->
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+        <div class="relative w-full sm:w-96">
+          <i data-lucide="search" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3"></i>
+          <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Buscar pechuga, alas, pollo entero..." class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-gold text-sm">
+        </div>
+
+        <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+          <span id="productCount" class="text-xs font-semibold text-slate-500">Cargando catálogo...</span>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <!-- Injected via JavaScript -->
+      </div>
+
+      <!-- Empty State -->
+      <div id="emptyProducts" class="hidden text-center py-16 bg-white rounded-3xl border border-dashed border-slate-300 p-8">
+        <div class="w-16 h-16 bg-brand-cream text-brand-navy rounded-full flex items-center justify-center mx-auto mb-4">
+          <i data-lucide="package-search" class="w-8 h-8 text-brand-gold"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-800">No se encontraron productos</h3>
+        <p class="text-sm text-slate-500 max-w-md mx-auto mt-1">Prueba con otra palabra clave o selecciona otra categoría.</p>
+        <button onclick="filterCategory(null)" class="mt-4 px-4 py-2 bg-brand-navy text-white rounded-xl text-sm font-semibold">Ver todos los productos</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SPECIAL PROMO BANNER -->
+  <section class="py-12 bg-brand-navy text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="bg-gradient-to-r from-brand-navyDark to-slate-900 rounded-3xl p-8 lg:p-12 shadow-2xl border border-brand-gold/40 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div class="lg:col-span-8 space-y-4">
+          <span class="bg-brand-gold text-brand-navyDark text-xs font-black uppercase px-3.5 py-1 rounded-full">Oferta Semanal Franco's Pollo</span>
+          <h2 class="text-3xl sm:text-4xl font-black tracking-tight text-white">
+            Combo Familiar Costeño Franco's
+          </h2>
+          <p class="text-slate-300 font-medium">
+            2 Kg de Pierna Pernil + 2 Kg de Alitas Seleccionadas + 1 Pechuga Magra Fileteada. ¡Frescura garantizada en Malambo, Soledad y Barranquilla!
+          </p>
+          <div class="flex items-center gap-4 pt-2">
+            <span class="text-3xl font-black text-brand-gold">$49.900 COP</span>
+            <span class="text-sm text-slate-400 line-through font-bold">$58.500 COP</span>
+          </div>
+        </div>
+        <div class="lg:col-span-4 flex justify-center">
+          <button onclick="addPromoCombo()" class="w-full sm:w-auto bg-brand-gold hover:bg-brand-goldHover text-brand-navyDark font-black px-8 py-4 rounded-2xl shadow-xl transition flex items-center justify-center gap-2">
+            <i data-lucide="plus-circle" class="w-5 h-5"></i> Agregar Combo al Carrito
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENEFITS SECTION -->
+  <section id="beneficios" class="py-16 bg-white border-t border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <h2 class="text-xs uppercase font-extrabold text-brand-gold tracking-wider">EL POLLO DE CADA HOGAR</h2>
+        <p class="text-3xl font-black text-brand-navy tracking-tight mt-1">¿Por qué Franco's Pollo es la mejor elección?</p>
+        <p class="text-slate-500 text-sm mt-2">Crianza seleccionada, despiece higiénico y distribución térmica en el Atlántico.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="bg-brand-cream/60 rounded-2xl p-6 border border-slate-200 hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-brand-navy text-brand-gold flex items-center justify-center mb-4">
+            <i data-lucide="snowflake" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-bold text-brand-navy mb-2">Cadena de Frío Rigurosa</h3>
+          <p class="text-sm text-slate-600">Temperatura controlada constante (0°C a 4°C) para mantener la terneza y el sabor natural.</p>
+        </div>
+
+        <div class="bg-brand-cream/60 rounded-2xl p-6 border border-slate-200 hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-brand-navy text-brand-gold flex items-center justify-center mb-4">
+            <i data-lucide="scale" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-bold text-brand-navy mb-2">Pesaje Exacto</h3>
+          <p class="text-sm text-slate-600">Sin trampas ni excesos de agua. Pagas exactamente los kilos y libras que recibes.</p>
+        </div>
+
+        <div class="bg-brand-cream/60 rounded-2xl p-6 border border-slate-200 hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-brand-navy text-brand-gold flex items-center justify-center mb-4">
+            <i data-lucide="map-pinned" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-bold text-brand-navy mb-2">Cobertura Atlántico</h3>
+          <p class="text-sm text-slate-600">Rutas de entrega directas en Malambo, Soledad y toda el área metropolitana de Barranquilla.</p>
+        </div>
+
+        <div class="bg-brand-cream/60 rounded-2xl p-6 border border-slate-200 hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-xl bg-brand-navy text-brand-gold flex items-center justify-center mb-4">
+            <i data-lucide="shield-check" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-bold text-brand-navy mb-2">Higiene y Salud</h3>
+          <p class="text-sm text-slate-600">Cumplimiento estricto de estándares sanitarios para la tranquilidad de tu familia y clientes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer id="contacto" class="bg-brand-navyDark text-slate-300 pt-16 pb-10 border-t border-brand-gold/30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+        <div class="space-y-4">
+          <div class="flex items-center space-x-3">
+            <img src="/static/images/logo_badge.jpg" class="w-10 h-10 rounded-full border border-brand-gold object-cover">
+            <span class="text-xl font-black text-white tracking-wider">FRANCO'S POLLO</span>
+          </div>
+          <p class="text-xs text-brand-gold font-bold uppercase tracking-widest">El Pollo de Cada Hogar</p>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Comercializadora y distribuidora de productos avícolas frescos de alta calidad en Malambo, Soledad y Barranquilla.
+          </p>
+          <div class="text-xs text-slate-500">
+            © 2026 FRANCO'S POLLO. Todos los derechos reservados.
+          </div>
+        </div>
+
+        <div>
+          <h4 class="text-white font-bold text-base mb-4">Nuestros Cortes</h4>
+          <ul class="space-y-2 text-sm text-slate-400">
+            <li><a href="#catalogo" onclick="filterCategory(1)" class="hover:text-brand-gold transition">Pollo Entero Campesino</a></li>
+            <li><a href="#catalogo" onclick="filterCategory(2)" class="hover:text-brand-gold transition">Pechuga Magra Especial</a></li>
+            <li><a href="#catalogo" onclick="filterCategory(3)" class="hover:text-brand-gold transition">Alitas para Broaster y Asados</a></li>
+            <li><a href="#catalogo" onclick="filterCategory(5)" class="hover:text-brand-gold transition">Pierna Pernil Jugosa</a></li>
+            <li><a href="#catalogo" onclick="filterCategory(7)" class="hover:text-brand-gold transition">Menudencias Frescas</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="text-white font-bold text-base mb-4">Sedes & Atención</h4>
+          <ul class="space-y-3 text-sm text-slate-400">
+            <li class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-brand-gold"></i> Malambo • Soledad • Barranquilla</li>
+            <li class="flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4 text-brand-gold"></i> +57 320 656 5410</li>
+            <li class="flex items-center gap-2"><i data-lucide="mail" class="w-4 h-4 text-brand-gold"></i> pedidos@francospollo.com</li>
+            <li class="flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4 text-brand-gold"></i> Lun - Sáb: 6:00 AM - 6:00 PM</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="text-white font-bold text-base mb-4">Atención & Domicilios</h4>
+          <p class="text-xs text-slate-400 mb-4">Llevamos el pollo más fresco directamente a tu puerta o negocio con empaque sellado y cadena de frío garantizada.</p>
+          <div class="bg-slate-900/90 p-4 rounded-2xl border border-brand-gold/30 space-y-2 text-xs">
+            <div class="text-brand-gold font-black">HORARIO CONTINUO</div>
+            <div class="text-slate-300">Lunes a Sábado: 6:00 AM - 6:00 PM</div>
+            <div class="text-slate-300">Domingos y Festivos: 7:00 AM - 2:00 PM</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- FLOATING WHATSAPP BUTTON (Con Icono Oficial Vectorial SVG) -->
+  <a href="https://wa.me/573206565410?text=Hola%20FRANCO'S%20POLLO,%20deseo%20m%C3%A1s%20informaci%C3%B3n%20sobre%20sus%20productos%20y%20precios%20en%20Malambo,%20Soledad%20y%20Barranquilla" target="_blank" class="fixed bottom-6 right-6 z-40 bg-[#25D366] hover:bg-[#20ba59] text-white p-3.5 rounded-full shadow-2xl transition-all transform hover:scale-110 flex items-center justify-center border-2 border-white" title="Contactar por WhatsApp">
+    <svg class="w-8 h-8 fill-current text-white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.044c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.159.57 4.185 1.564 5.938l-1.564 5.719 5.873-1.54c1.707.933 3.667 1.464 5.748 1.464 6.627 0 12-5.373 12-12 0-6.627-5.373-12-12-12z"/>
+    </svg>
+  </a>
+
+  <!-- SHOPPING CART DRAWER (SLIDE-OVER) -->
+  <div id="cartDrawerBackdrop" onclick="toggleCartDrawer(false)" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 transition-opacity"></div>
+  <aside id="cartDrawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
+    <div class="p-6 border-b border-slate-200 flex items-center justify-between bg-brand-cream">
+      <div class="flex items-center gap-2">
+        <i data-lucide="shopping-bag" class="w-6 h-6 text-brand-navy"></i>
+        <h3 class="font-extrabold text-brand-navy text-lg">Tu Carrito de Compra</h3>
+      </div>
+      <button onclick="toggleCartDrawer(false)" class="p-2 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-slate-200 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
+
+    <div class="p-6 border-t border-slate-200 bg-slate-50 space-y-3">
+      <div class="flex justify-between text-sm text-slate-600">
+        <span>Subtotal</span>
+        <span id="cartSubtotal" class="font-bold text-slate-900">$0 COP</span>
+      </div>
+      <div class="flex justify-between text-sm text-slate-600">
+        <span>Costo de Domicilio</span>
+        <span id="cartDeliveryFee" class="font-bold text-slate-900">$5.000 COP</span>
+      </div>
+      <div class="flex justify-between text-base text-slate-900 font-extrabold pt-2 border-t border-slate-200">
+        <span>Total a Pagar</span>
+        <span id="cartTotal" class="text-xl text-brand-navy font-black">$0 COP</span>
+      </div>
+      <div id="freeShippingNotice" class="text-[11px] text-brand-gold font-bold text-center"></div>
+
+      <button id="checkoutBtn" onclick="openCheckoutModal()" class="w-full bg-brand-navy hover:bg-brand-navyDark text-white font-black py-4 rounded-2xl shadow-lg transition flex items-center justify-center gap-2">
+        <i data-lucide="credit-card" class="w-5 h-5 text-brand-gold"></i> Proceder al Pago (Checkout)
+      </button>
+    </div>
+  </aside>
+
+  <!-- CHECKOUT MODAL -->
+  <div id="checkoutModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 animate-fade-in">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-brand-cream text-brand-navy flex items-center justify-center">
+            <i data-lucide="clipboard-check" class="w-6 h-6 text-brand-gold"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-black text-brand-navy">Finalizar Compra</h3>
+            <p class="text-xs text-slate-500">Despachos rápidos en Malambo, Soledad y Barranquilla</p>
+          </div>
+        </div>
+        <button onclick="closeCheckoutModal()" class="text-slate-400 hover:text-slate-700 p-2 rounded-xl">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="checkoutForm" onsubmit="submitCheckout(event)" class="space-y-4 pt-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Nombre Completo *</label>
+            <input type="text" id="custName" required placeholder="Ej: Carlos Mejía" class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-gold focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Teléfono / WhatsApp *</label>
+            <input type="tel" id="custPhone" required placeholder="Ej: 320 656 5410" class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-gold focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold text-slate-700 mb-1">Dirección de Entrega *</label>
+            <input type="text" id="custAddress" required placeholder="Ej: Calle 30 # 25-10" class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-gold focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Barrio *</label>
+            <input type="text" id="custNeighborhood" required placeholder="Ej: El Concorde" class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-gold focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Municipio / Ciudad *</label>
+          <select id="custCity" class="w-full p-3 rounded-xl border border-slate-200 text-sm bg-white font-bold text-brand-navy">
+            <option value="Malambo">Malambo (Atlántico)</option>
+            <option value="Soledad">Soledad (Atlántico)</option>
+            <option value="Barranquilla">Barranquilla (Atlántico)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Instrucciones u Observaciones</label>
+          <textarea id="custNotes" rows="2" placeholder="Ej: Pollo entero picado en presas, pechuga fileteada..." class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-gold focus:outline-none"></textarea>
+        </div>
+
+        <!-- Métodos de pago -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-2">Método de Pago *</label>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-brand-cream transition">
+              <input type="radio" name="paymentMethod" value="Pago contra entrega" checked class="text-brand-navy">
+              <span class="text-xs font-bold text-slate-800">Contra Entrega</span>
+            </label>
+            <label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-brand-cream transition">
+              <input type="radio" name="paymentMethod" value="Transferencia bancaria" class="text-brand-navy">
+              <span class="text-xs font-bold text-slate-800">Nequi / Bancolombia</span>
+            </label>
+            <label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-brand-cream transition">
+              <input type="radio" name="paymentMethod" value="Efectivo" class="text-brand-navy">
+              <span class="text-xs font-bold text-slate-800">Efectivo Exacto</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="bg-brand-cream p-4 rounded-2xl border border-brand-gold/30 flex justify-between items-center text-sm">
+          <div>
+            <div class="text-slate-500 text-xs">Total con Domicilio:</div>
+            <div id="checkoutSummaryTotal" class="text-xl font-black text-brand-navy">$0 COP</div>
+          </div>
+          <button type="submit" id="confirmOrderBtn" class="bg-brand-navy hover:bg-brand-navyDark text-white font-black px-6 py-3 rounded-xl transition flex items-center gap-2">
+            <i data-lucide="check" class="w-4 h-4 text-brand-gold"></i> Confirmar Pedido
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ORDER CONFIRMATION MODAL -->
+  <div id="confirmationModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-8 text-center animate-fade-in">
+      <div class="w-20 h-20 bg-brand-cream text-brand-navy rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-brand-gold">
+        <i data-lucide="check-circle-2" class="w-12 h-12 text-brand-gold"></i>
+      </div>
+      <h3 class="text-2xl font-black text-brand-navy">¡Pedido Registrado con Éxito!</h3>
+      <p class="text-sm text-slate-500 mt-2">Gracias por elegir a <b>FRANCO'S POLLO</b> – El Pollo de Cada Hogar.</p>
+
+      <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 my-6 text-left space-y-2 text-sm">
+        <div class="flex justify-between">
+          <span class="text-slate-500">Código de Pedido:</span>
+          <span id="confOrderCode" class="font-extrabold text-brand-navy text-base"></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Cliente:</span>
+          <span id="confCustomerName" class="font-medium text-slate-800"></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Total a Pagar:</span>
+          <span id="confTotal" class="font-black text-slate-900"></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Método de Pago:</span>
+          <span id="confPayment" class="font-semibold text-slate-800"></span>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-3">
+        <button id="confWhatsAppBtn" class="flex-1 bg-[#25D366] hover:bg-[#1ebe59] text-white font-black py-3.5 px-4 rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg transition-all">
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.044c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.159.57 4.185 1.564 5.938l-1.564 5.719 5.873-1.54c1.707.933 3.667 1.464 5.748 1.464 6.627 0 12-5.373 12-12 0-6.627-5.373-12-12-12z"/></svg>
+          Enviar Pedido por WhatsApp
+        </button>
+        <button onclick="closeConfirmationModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3.5 px-4 rounded-xl text-sm">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTH MODAL -->
+  <div id="authModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-fade-in">
+      <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center gap-2">
+          <img src="/static/images/logo_badge.jpg" class="w-8 h-8 rounded-full border border-brand-gold object-cover">
+          <h3 id="authModalTitle" class="text-xl font-black text-brand-navy">Iniciar Sesión</h3>
+        </div>
+        <button onclick="closeAuthModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="flex border-b border-slate-200 mb-6 text-sm font-bold">
+        <button id="authTabLogin" onclick="switchAuthTab('login')" class="flex-1 pb-3 border-b-2 border-brand-navy text-brand-navy">Iniciar Sesión</button>
+        <button id="authTabRegister" onclick="switchAuthTab('register')" class="flex-1 pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-600">Crear Cuenta</button>
+      </div>
+
+      <form id="loginForm" onsubmit="handleCustomerLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Correo Electrónico</label>
+          <input type="email" id="loginEmail" required placeholder="correo@ejemplo.com" class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-gold focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Contraseña</label>
+          <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-gold focus:outline-none">
+        </div>
+        <button type="submit" class="w-full bg-brand-navy hover:bg-brand-navyDark text-white font-bold py-3.5 rounded-xl transition shadow">
+          Ingresar
+        </button>
+      </form>
+
+      <form id="registerForm" onsubmit="handleCustomerRegister(event)" class="space-y-4 hidden">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nombre Completo *</label>
+          <input type="text" id="regName" required placeholder="Ej: Carlos Mejía" autocomplete="off" class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-gold focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Correo Electrónico *</label>
+          <input type="email" id="regEmail" required placeholder="carlos@ejemplo.com" autocomplete="off" class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-gold focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Teléfono Móvil *</label>
+          <input type="tel" id="regPhone" required placeholder="320 656 5410" autocomplete="off" class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-gold focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Dirección de Entrega</label>
+          <input type="text" id="regAddress" placeholder="Ej: Calle 30 # 25-10" autocomplete="off" class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-gold focus:outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Barrio</label>
+            <input type="text" id="regNeighborhood" placeholder="Ej: El Concorde" autocomplete="off" class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-gold focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Municipio</label>
+            <select id="regCity" class="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold text-brand-navy">
+              <option value="Malambo">Malambo</option>
+              <option value="Soledad">Soledad</option>
+              <option value="Barranquilla">Barranquilla</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Contraseña *</label>
+          <input type="password" id="regPassword" required placeholder="Mínimo 6 caracteres" autocomplete="new-password" class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-brand-gold focus:outline-none">
+        </div>
+        <button id="regSubmitBtn" type="submit" class="w-full bg-brand-gold hover:bg-brand-goldHover text-brand-navyDark font-black py-3.5 rounded-xl transition shadow">
+          Registrarme
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- TRACK ORDER MODAL -->
+  <div id="trackModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 animate-fade-in">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-black text-brand-navy flex items-center gap-2">
+          <i data-lucide="search" class="w-5 h-5 text-brand-gold"></i> Rastrear Mi Pedido
+        </h3>
+        <button onclick="closeTrackOrderModal()" class="text-slate-400 hover:text-slate-700">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="flex gap-2 mb-4">
+        <input type="text" id="trackCodeInput" placeholder="Ej: FP-A1B2C3" class="flex-1 p-3 rounded-xl border border-slate-200 text-sm uppercase">
+        <button onclick="fetchTrackOrder()" class="bg-brand-navy text-white px-4 rounded-xl text-sm font-bold">Buscar</button>
+      </div>
+
+      <div id="trackResultContainer" class="hidden bg-slate-50 p-4 rounded-2xl border border-slate-200 text-sm space-y-2"></div>
+    </div>
+  </div>
+
+  <!-- MIS PEDIDOS MODAL (CLIENTE) -->
+  <div id="myOrdersModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6 animate-fade-in max-h-[90vh] flex flex-col">
+      <div class="flex justify-between items-center pb-4 border-b border-slate-100">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-brand-gold/15 flex items-center justify-center text-brand-navy">
+            <i data-lucide="package" class="w-5 h-5 text-brand-gold"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-black text-brand-navy">Mis Pedidos Realizados</h3>
+            <p class="text-xs text-slate-500">Historial y seguimiento de tus compras en Franco's Pollo</p>
+          </div>
+        </div>
+        <button onclick="closeMyOrdersModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Contenedor scrollable de pedidos -->
+      <div id="myOrdersListContainer" class="flex-1 overflow-y-auto py-4 space-y-3 pr-1">
+        <!-- Renderizado dinámico desde JS -->
+        <div class="text-center py-10 text-slate-400">
+          <i data-lucide="loader" class="w-6 h-6 animate-spin mx-auto mb-2 text-brand-gold"></i>
+          <p class="text-sm">Cargando tus pedidos...</p>
+        </div>
+      </div>
+      
+      <div class="pt-3 border-t border-slate-100 flex justify-end">
+        <button onclick="closeMyOrdersModal()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/static/js/app.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>
