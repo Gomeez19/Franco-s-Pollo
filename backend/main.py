@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from fastapi import FastAPI, Depends, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
@@ -33,22 +34,28 @@ app.include_router(inventory.router, prefix=settings.API_V1_STR)
 app.include_router(calculator.router, prefix=settings.API_V1_STR)
 app.include_router(admin.router, prefix=settings.API_V1_STR)
 
+# Resolve base directory (compatible local y Vercel)
+BASE_DIR = Path(__file__).resolve().parent.parent
+FRONTEND_DIR = BASE_DIR / "frontend"
+STATIC_DIR = FRONTEND_DIR / "static"
+
 # Ensure static directories exist
-os.makedirs("frontend/static/css", exist_ok=True)
-os.makedirs("frontend/static/js", exist_ok=True)
-os.makedirs("frontend/static/images", exist_ok=True)
+os.makedirs(str(STATIC_DIR / "css"), exist_ok=True)
+os.makedirs(str(STATIC_DIR / "js"), exist_ok=True)
+os.makedirs(str(STATIC_DIR / "images"), exist_ok=True)
+os.makedirs(str(STATIC_DIR / "uploads" / "products"), exist_ok=True)
 
 # Mount static files
-app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_store_home():
-    return FileResponse("frontend/index.html")
+    return FileResponse(str(FRONTEND_DIR / "index.html"))
 
 @app.get("/admin", response_class=HTMLResponse)
 @app.get("/admin/{path:path}", response_class=HTMLResponse)
 async def serve_admin_panel():
-    return FileResponse("frontend/admin.html")
+    return FileResponse(str(FRONTEND_DIR / "admin.html"))
 
 @app.get("/health")
 def health_check():
