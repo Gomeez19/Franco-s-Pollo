@@ -15,10 +15,5 @@
       "src": "/(.*)",
       "dest": "/api/index.py"
     }
-  ],
-  "env": {
-    "DATABASE_URL": "@database_url",
-    "SECRET_KEY": "@secret_key",
-    "WHATSAPP_NUMBER": "573206565410"
-  }
+  ]
 }
