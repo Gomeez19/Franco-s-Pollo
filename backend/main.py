@@ -8,8 +8,25 @@ from backend.config import settings
 from backend.database import engine, Base
 from backend.routers import auth, products, orders, inventory, calculator, admin
 
-# Create tables
-Base.metadata.create_all(bind=engine)
+# Resolve base directory (compatible local y Vercel)
+BASE_DIR = Path(__file__).resolve().parent.parent
+FRONTEND_DIR = BASE_DIR / "frontend"
+STATIC_DIR = FRONTEND_DIR / "static"
+
+# Ensure directories exist (handling read-only serverless environment safely)
+try:
+    os.makedirs(str(STATIC_DIR / "css"), exist_ok=True)
+    os.makedirs(str(STATIC_DIR / "js"), exist_ok=True)
+    os.makedirs(str(STATIC_DIR / "images"), exist_ok=True)
+    os.makedirs(str(STATIC_DIR / "uploads" / "products"), exist_ok=True)
+except Exception:
+    pass
+
+# Ensure tables exist safely
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"Database init notice: {e}")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -33,17 +50,6 @@ app.include_router(orders.router, prefix=settings.API_V1_STR)
 app.include_router(inventory.router, prefix=settings.API_V1_STR)
 app.include_router(calculator.router, prefix=settings.API_V1_STR)
 app.include_router(admin.router, prefix=settings.API_V1_STR)
-
-# Resolve base directory (compatible local y Vercel)
-BASE_DIR = Path(__file__).resolve().parent.parent
-FRONTEND_DIR = BASE_DIR / "frontend"
-STATIC_DIR = FRONTEND_DIR / "static"
-
-# Ensure static directories exist
-os.makedirs(str(STATIC_DIR / "css"), exist_ok=True)
-os.makedirs(str(STATIC_DIR / "js"), exist_ok=True)
-os.makedirs(str(STATIC_DIR / "images"), exist_ok=True)
-os.makedirs(str(STATIC_DIR / "uploads" / "products"), exist_ok=True)
 
 # Mount static files
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
