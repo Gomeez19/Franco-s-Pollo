@@ -441,29 +441,29 @@ function showConfirmationModal(order) {
 
   const targetWhatsApp = (businessSettings && businessSettings.whatsapp) ? businessSettings.whatsapp.replace(/\D/g, '') : '573206565410';
 
-  // Plantilla profesional de confirmación del pedido para WhatsApp
-  let itemsDetail = '';
-  if (order.items && order.items.length > 0) {
-    itemsDetail = order.items.map(it => `• ${it.product_name} x ${it.quantity} ${it.unit} ($${Math.round(it.subtotal || (it.price * it.quantity)).toLocaleString('es-CO')})`).join('\n');
-  } else {
-    itemsDetail = '• Consulta con el asesor los detalles de tus productos';
-  }
+  // Plantilla WhatsApp limpia y práctica
+  const productos = (order.items && order.items.length > 0)
+    ? order.items.map(it => `  - ${it.product_name} x ${it.quantity} ${it.unit}  *$${Math.round(it.subtotal || (it.price * it.quantity)).toLocaleString('es-CO')}*`).join('\n')
+    : '  - Ver detalles con el asesor';
 
-  const rawMessage = 
-    `🍗 *¡NUEVO PEDIDO REGISTRADO EN FRANCO'S POLLO!*\n\n` +
-    `*Código de Pedido:* #${order.order_code}\n` +
+  const domicilio = order.delivery_fee === 0 ? 'GRATIS' : formatCOP(order.delivery_fee);
+  const notas = order.notes ? `\n*Nota:* ${order.notes}` : '';
+
+  const rawMessage =
+    `*FRANCO'S POLLO* - Nuevo Pedido\n` +
+    `─────────────────────\n` +
+    `*Codigo:* #${order.order_code}\n` +
     `*Cliente:* ${order.customer_name}\n` +
-    `*Teléfono:* ${order.customer_phone}\n` +
-    `*Dirección:* ${order.shipping_address}\n` +
-    `*Barrio:* ${order.shipping_neighborhood}\n` +
-    `*Ciudad:* ${order.shipping_city || 'Barranquilla'}\n` +
-    (order.notes ? `*Observaciones:* ${order.notes}\n` : '') +
-    `\n📦 *PRODUCTOS:*\n${itemsDetail}\n\n` +
-    `*Subtotal:* ${formatCOP(order.subtotal)}\n` +
-    `*Costo Domicilio:* ${order.delivery_fee === 0 ? 'GRATIS' : formatCOP(order.delivery_fee)}\n` +
-    `💰 *TOTAL A PAGAR:* ${formatCOP(order.total)}\n` +
-    `*Método de Pago:* ${order.payment_method}\n\n` +
-    `_Por favor confirmar recepción y tiempo estimado de entrega._`;
+    `*Tel:* ${order.customer_phone}\n` +
+    `*Dir:* ${order.shipping_address}, ${order.shipping_neighborhood}, ${order.shipping_city || 'Barranquilla'}` +
+    `${notas}\n` +
+    `─────────────────────\n` +
+    `*PRODUCTOS:*\n${productos}\n` +
+    `─────────────────────\n` +
+    `Subtotal: ${formatCOP(order.subtotal)}\n` +
+    `Domicilio: ${domicilio}\n` +
+    `*TOTAL: ${formatCOP(order.total)}*\n` +
+    `Pago: ${order.payment_method}`;
 
   const encodedUrl = `https://wa.me/${targetWhatsApp}?text=${encodeURIComponent(rawMessage)}`;
 
