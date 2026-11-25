@@ -81,6 +81,13 @@
 
         <!-- Action Buttons -->
         <div class="flex items-center space-x-3">
+
+          <!-- Mis Pedidos: visible solo en móvil (md:hidden), separado del menú desktop -->
+          <button onclick="openMyOrdersModal()" class="md:hidden flex items-center gap-1.5 px-3 py-2 rounded-xl bg-brand-gold/15 hover:bg-brand-gold/25 text-brand-navy border border-brand-gold/40 font-black text-xs transition">
+            <i data-lucide="package" class="w-4 h-4 text-brand-gold"></i>
+            <span>Pedidos</span>
+          </button>
+
           <!-- User / Auth -->
           <div id="userAuthSection" class="relative">
             <button id="userMenuBtn" onclick="toggleUserDropdown()" class="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 transition">

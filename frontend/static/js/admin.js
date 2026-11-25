@@ -3,8 +3,8 @@ const API_BASE = '/api';
 
 let currentAdminTab = 'poultry-control';
 let currentPoultrySubtab = 'control';
-let adminToken = sessionStorage.getItem('francos_admin_token');
-let adminUser = JSON.parse(sessionStorage.getItem('francos_admin_user') || 'null');
+let adminToken = localStorage.getItem('francos_admin_token');
+let adminUser = JSON.parse(localStorage.getItem('francos_admin_user') || 'null');
 let adminProducts = [];
 let adminCategories = [];
 let salesChartInstance = null;
@@ -109,6 +109,9 @@ async function handleAdminLogin(e) {
 
     sessionStorage.setItem('francos_admin_token', adminToken);
     sessionStorage.setItem('francos_admin_user', JSON.stringify(adminUser));
+    // También guardar en localStorage para persistir al recargar/navegar
+    localStorage.setItem('francos_admin_token', adminToken);
+    localStorage.setItem('francos_admin_user', JSON.stringify(adminUser));
     clearLoginForm();
 
     document.getElementById('adminLoginOverlay').classList.add('hidden');
@@ -129,6 +132,8 @@ function logoutAdmin() {
   if (inactivityTimer) clearTimeout(inactivityTimer);
   sessionStorage.removeItem('francos_admin_token');
   sessionStorage.removeItem('francos_admin_user');
+  localStorage.removeItem('francos_admin_token');
+  localStorage.removeItem('francos_admin_user');
   adminToken = null;
   adminUser = null;
   clearLoginForm();

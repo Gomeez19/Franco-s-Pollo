@@ -354,6 +354,29 @@ function toggleCartDrawer(open) {
 // CHECKOUT LOGIC
 function openCheckoutModal() {
   if (cart.length === 0) return;
+
+  // ── Requerir inicio de sesión para comprar ──
+  if (!currentUser) {
+    toggleCartDrawer(false);
+    // Mostrar modal de auth en pestaña login con mensaje explicativo
+    openAuthModal('login');
+    // Pequeño banner dentro del modal indicando por qué se pide login
+    setTimeout(() => {
+      const title = document.getElementById('authModalTitle');
+      if (title) title.textContent = '¡Inicia sesión para comprar!';
+      // Agregar nota debajo del form de login si no existe
+      const form = document.getElementById('loginForm');
+      if (form && !document.getElementById('loginCheckoutNote')) {
+        const note = document.createElement('p');
+        note.id = 'loginCheckoutNote';
+        note.className = 'text-xs text-brand-gold font-bold text-center pt-1';
+        note.textContent = '🛒 Necesitas una cuenta para completar tu compra.';
+        form.prepend(note);
+      }
+    }, 50);
+    return;
+  }
+
   toggleCartDrawer(false);
 
   // Pre-fill if user is logged in
@@ -577,8 +600,15 @@ async function handleCustomerLogin(e) {
     if (data.role === 'admin') {
       sessionStorage.setItem('francos_admin_token', data.access_token);
       sessionStorage.setItem('francos_admin_user', JSON.stringify(currentUser));
+      localStorage.setItem('francos_admin_token', data.access_token);
+      localStorage.setItem('francos_admin_user', JSON.stringify(currentUser));
       window.location.href = '/admin';
       return;
+    }
+
+    // ── Si vino desde el checkout (carrito no vacío), abrir checkout directo ──
+    if (cart.length > 0) {
+      openCheckoutModal();
     }
   } catch (err) {
     showAuthError('Error al conectar con el servidor. Verifica tu conexión.');
