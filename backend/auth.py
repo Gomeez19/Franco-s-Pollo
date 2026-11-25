@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from typing import Optional
 import hashlib
 import secrets
-from passlib.context import CryptContext
 from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -13,11 +12,7 @@ from backend import models
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/token", auto_error=False)
 
-# Bcrypt: seguro, estándar y rápido en entornos serverless
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-
-# ── Compatibilidad con cuentas creadas antes de la migración a bcrypt ──────────
 def _legacy_sha256_verify(plain_password: str, stored_hash: str) -> bool:
     """Verifica hashes del formato antiguo: salt$sha256_hex"""
     try:
@@ -25,7 +20,6 @@ def _legacy_sha256_verify(plain_password: str, stored_hash: str) -> bool:
         if len(parts) != 2:
             return False
         salt, expected = parts
-        # Debe ser hex de 64 chars (SHA-256) para distinguirlo de bcrypt
         if len(expected) != 64:
             return False
         val = (plain_password + salt).encode("utf-8")
@@ -37,33 +31,32 @@ def _legacy_sha256_verify(plain_password: str, stored_hash: str) -> bool:
 
 
 def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    """Hash seguro y rápido en C usando PBKDF2-HMAC-SHA256 (sin dependencias externas)."""
+    salt = secrets.token_hex(16)
+    dk = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("utf-8"), 100_000)
+    return f"pbkdf2${salt}${dk.hex()}"
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """
-    Intenta bcrypt primero (cuentas nuevas).
-    Si el hash no es bcrypt (no empieza por $2b$), prueba el formato SHA-256 legado.
-    """
     try:
-        if hashed_password.startswith("$2b$") or hashed_password.startswith("$2a$"):
-            # Hash bcrypt normal
-            return pwd_context.verify(plain_password, hashed_password)
+        if hashed_password.startswith("pbkdf2$"):
+            _, salt, expected = hashed_password.split("$")
+            dk = hashlib.pbkdf2_hmac("sha256", plain_password.encode("utf-8"), salt.encode("utf-8"), 100_000)
+            return secrets.compare_digest(dk.hex(), expected)
+        elif hashed_password.startswith("$2b$") or hashed_password.startswith("$2a$"):
+            import bcrypt
+            return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
         else:
-            # Formato legado SHA-256: salt$hex
             return _legacy_sha256_verify(plain_password, hashed_password)
     except Exception:
         return False
 
 
 def rehash_to_bcrypt_if_needed(plain_password: str, stored_hash: str) -> Optional[str]:
-    """
-    Si el hash almacenado es SHA-256 legado y la contraseña es correcta,
-    devuelve un nuevo hash bcrypt para migrar el registro.
-    """
-    if stored_hash.startswith("$2b$") or stored_hash.startswith("$2a$"):
-        return None  # Ya es bcrypt, no hay que migrar
-    if _legacy_sha256_verify(plain_password, stored_hash):
+    """Migra cuentas antiguas (SHA-256 o bcrypt) al formato estándar pbkdf2$..."""
+    if stored_hash.startswith("pbkdf2$"):
+        return None
+    if verify_password(plain_password, stored_hash):
         return get_password_hash(plain_password)
     return None
 
