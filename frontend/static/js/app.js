@@ -663,7 +663,33 @@ async function handleCustomerRegister(e) {
       return;
     }
 
-    // Éxito: limpiar campos y cambiar a login
+    // Éxito: hacer login automático con las mismas credenciales
+    const loginRes = await fetch(`${API_BASE}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+
+    if (loginRes.ok) {
+      const loginData = await loginRes.json();
+      localStorage.setItem('francos_token', loginData.access_token);
+      currentUser = {
+        id: loginData.user_id,
+        email: loginData.email,
+        full_name: loginData.full_name,
+        role: loginData.role
+      };
+      localStorage.setItem('francos_user', JSON.stringify(currentUser));
+      updateAuthUI();
+      closeAuthModal();
+      // Si venía del carrito, abrir checkout directo
+      if (cart.length > 0) {
+        openCheckoutModal();
+      }
+      return;
+    }
+
+    // Fallback: ir a login manualmente
     ['regName', 'regEmail', 'regPhone', 'regAddress', 'regNeighborhood', 'regPassword'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';

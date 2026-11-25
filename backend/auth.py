@@ -1,8 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Optional
-import hashlib
-import os
-import secrets
+from passlib.context import CryptContext
 from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -13,26 +11,15 @@ from backend import models
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/token", auto_error=False)
 
-def _hash_with_salt(password: str, salt: str) -> str:
-    # 25,000 rounds of sha256 with salt
-    val = (password + salt).encode("utf-8")
-    for _ in range(25000):
-        val = hashlib.sha256(val + salt.encode("utf-8")).digest()
-    return val.hex()
+# Bcrypt: seguro, estándar y rápido en entornos serverless
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def get_password_hash(password: str) -> str:
-    salt = secrets.token_hex(16)
-    hashed = _hash_with_salt(password, salt)
-    return f"{salt}${hashed}"
+    return pwd_context.hash(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     try:
-        parts = hashed_password.split("$")
-        if len(parts) != 2:
-            return False
-        salt, expected_hash = parts
-        calc_hash = _hash_with_salt(plain_password, salt)
-        return secrets.compare_digest(calc_hash, expected_hash)
+        return pwd_context.verify(plain_password, hashed_password)
     except Exception:
         return False
 
