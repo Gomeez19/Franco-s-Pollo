@@ -11,9 +11,11 @@ __pycache__/
 *.db
 *.sqlite3
 
-# Variables de entorno y secretos
+# Variables de entorno y secretos – NUNCA subir al repo
+.env
 .env.local
 .env.*.local
+*.env
 
 # Vercel
 .vercel/

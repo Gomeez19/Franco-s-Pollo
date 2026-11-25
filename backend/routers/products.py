@@ -2,6 +2,7 @@ import re
 import os
 import uuid
 import shutil
+from pathlib import Path
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
@@ -11,8 +12,13 @@ from backend.auth import require_admin
 
 router = APIRouter(prefix="/products", tags=["Productos"])
 
-UPLOAD_DIR = os.path.join("frontend", "static", "uploads", "products")
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+# Absolute path safe for Vercel (read-only serverless FS)
+_HERE = Path(__file__).resolve().parent.parent.parent  # project root
+UPLOAD_DIR = str(_HERE / "frontend" / "static" / "uploads" / "products")
+try:
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+except OSError:
+    pass  # Vercel read-only FS: uploads stored in-memory/ephemeral only
 
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
 
