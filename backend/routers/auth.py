@@ -87,11 +87,6 @@ def login_json(credentials: schemas.UserLogin, db: Session = Depends(get_db)):
     if new_hash:
         user.hashed_password = new_hash
         db.commit()
-
-    new_hash = rehash_to_bcrypt_if_needed(form_data.password, user.hashed_password)
-    if new_hash:
-        user.hashed_password = new_hash
-        db.commit()
     
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
