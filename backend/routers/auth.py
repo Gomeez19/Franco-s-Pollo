@@ -6,7 +6,7 @@ from backend.database import get_db
 from backend import models, schemas
 from backend.auth import (
     verify_password, get_password_hash, create_access_token,
-    get_current_user
+    get_current_user, rehash_to_bcrypt_if_needed
 )
 from backend.config import settings
 
@@ -52,6 +52,11 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
         )
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Usuario inactivo")
+
+    new_hash = rehash_to_bcrypt_if_needed(form_data.password, user.hashed_password)
+    if new_hash:
+        user.hashed_password = new_hash
+        db.commit()
     
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
@@ -77,6 +82,16 @@ def login_json(credentials: schemas.UserLogin, db: Session = Depends(get_db)):
         )
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Usuario inactivo")
+
+    new_hash = rehash_to_bcrypt_if_needed(credentials.password, user.hashed_password)
+    if new_hash:
+        user.hashed_password = new_hash
+        db.commit()
+
+    new_hash = rehash_to_bcrypt_if_needed(form_data.password, user.hashed_password)
+    if new_hash:
+        user.hashed_password = new_hash
+        db.commit()
     
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
